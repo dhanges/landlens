@@ -1,0 +1,14 @@
+# Secrets — only ever in an uncommitted .env (see .env.example)
+.env
+
+# Local data: OSM exports and document PDFs (git-ignored per spec 3.1)
+/data/
+
+# Build output
+/web/.next/
+/web/out/
+/web/node_modules/
+__pycache__/
+*.pyc
+/api/dist/
+/api/build/
