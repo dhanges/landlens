@@ -9,10 +9,10 @@ WORKDIR /app
 
 # Install dependencies first for layer caching. devDependencies (typescript,
 # tailwindcss, @types/*) are needed to run `next build`, so include them even
-# though NODE_ENV=production (approved deviation, T-M0-4). `npm ci` lands in
-# T-M0-4b once a package-lock.json exists.
-COPY package.json ./
-RUN npm install --include=dev
+# though NODE_ENV=production (approved deviation, T-M0-4). T-M0-4b: reproducible
+# installs with npm ci from package-lock.json.
+COPY package.json package-lock.json ./
+RUN npm ci --include=dev
 
 # Build the production bundle.
 COPY . .
