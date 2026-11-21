@@ -40,11 +40,10 @@ def _db_ok() -> bool:
     """
     conninfo = os.environ.get("DATABASE_URL", "")
     try:
-        with psycopg.connect(conninfo, connect_timeout=5) as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT 1")
-                return cur.fetchone() == (1,)
-    except Exception:
+        with psycopg.connect(conninfo, connect_timeout=5) as conn, conn.cursor() as cur:
+            cur.execute("SELECT 1")
+            return cur.fetchone() == (1,)
+    except psycopg.Error:
         return False
 
 
