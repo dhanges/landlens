@@ -1,0 +1,100 @@
+# LandLens Compose stack (spec 2.17): db, martin, api, web, caddy.
+# Only caddy is published on the host (:80, plain HTTP locally; HTTPS is V1 per
+# spec 2.15). Every other service talks on the internal Compose network.
+# All passwords come from .env via variable substitution (never hard-coded).
+
+services:
+  # Postgres 17 + PostGIS + pgvector. The four extensions are created by the
+  # image init script (DEC-004/OQ-32) as the owner role on first boot.
+  db:
+    build: ./db
+    environment:
+      # DEC-004: the bootstrap user is landlens_owner. POSTGRES_DB is left unset,
+      # so the default database is named landlens_owner too.
+      POSTGRES_USER: landlens_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    networks:
+      - landlens
+
+  # Vector tile server. In M0 there are no tile functions yet (M2), so Martin
+  # starts with zero function sources; it connects as landlens_owner until 013
+  # (T-M1-5) introduces the read-only landlens_tiles role (spec 2.10, 2.2).
+  martin:
+    image: ghcr.io/maplibre/martin:1.16.1
+    environment:
+      DATABASE_URL: postgresql://landlens_owner:${POSTGRES_PASSWORD}@db:5432/landlens_owner
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - landlens
+
+  # FastAPI on uvicorn (2 workers). Connects to Postgres via DATABASE_URL and
+  # exposes /api/health, which the healthcheck and Caddy both rely on.
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgresql://landlens_owner:${POSTGRES_PASSWORD}@db:5432/landlens_owner
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    networks:
+      - landlens
+
+  # Next.js production build served with `next start` (not the dev server).
+  web:
+    build: ./web
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    networks:
+      - landlens
+
+  # Reverse proxy: / -> web, /api -> api (prefix kept), /tiles -> martin
+  # (prefix stripped). The only host-published port.
+  caddy:
+    image: caddy:2.11.8
+    ports:
+      - "80:80"
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+      martin:
+        condition: service_started
+    networks:
+      - landlens
+
+# The Caddyfile is delivered as a Compose config (no host bind mount, harness
+# safety policy). Its content is read from the file checked in next to this one.
+configs:
+  caddyfile:
+    file: ./Caddyfile
+
+volumes:
+  pgdata:
+
+networks:
+  landlens:

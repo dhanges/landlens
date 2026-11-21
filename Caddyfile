@@ -1,0 +1,20 @@
+# LandLens reverse proxy (spec 2.2, 2.17). Plain HTTP on :80 locally; HTTPS is
+# V1 (spec 2.15). Routes:
+#   /tiles/*  -> martin:3000, with the /tiles prefix stripped (Martin serves
+#               /{source}/{z}/{x}/{y}); cache headers on tiles (spec 2.17).
+#   /api/*    -> api:8000, prefix kept (FastAPI serves /api/health, /api/docs).
+#   /         -> web:3000 (Next.js).
+:80 {
+	handle_path /tiles/* {
+		header Cache-Control "public, max-age=3600"
+		reverse_proxy martin:3000
+	}
+
+	handle /api/* {
+		reverse_proxy api:8000
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+}
