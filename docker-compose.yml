@@ -116,6 +116,36 @@ services:
     networks:
       - landlens
 
+  # pytest (spec 2.16) and the unlock concurrency harness (spec 2.11): the test image with the working tree's
+  # api/ mounted at /src, so tests always run the current code. pytest builds its own landlens_test database.
+  test:
+    build:
+      context: ./api
+      target: test
+    image: landlens-api:test
+    profiles: ["tools"]
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /src
+    command: ["pytest", "-q", "tests"]
+    environment:
+      PYTHONPATH: /src
+      HOME: /tmp
+      PYTHONDONTWRITEBYTECODE: "1"
+      DATABASE_URL: postgresql://landlens_owner:${POSTGRES_PASSWORD}@db:5432/landlens_owner
+      LANDLENS_API_PASSWORD: ${LANDLENS_API_PASSWORD}
+      LANDLENS_TILES_PASSWORD: ${LANDLENS_TILES_PASSWORD}
+      LANDLENS_MIGRATIONS_DIR: /migrations
+      API_BASE: http://caddy
+    volumes:
+      - ./api:/src
+      - ./db/migrations:/migrations:ro
+      - ./bench:/bench
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - landlens
+
   # Next.js production build served with `next start` (not the dev server).
   web:
     build: ./web

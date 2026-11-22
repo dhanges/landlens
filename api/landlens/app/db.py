@@ -9,7 +9,6 @@ from __future__ import annotations
 import asyncio
 import random
 from collections.abc import Awaitable, Callable
-from typing import TypeVar
 
 from fastapi import Request
 from psycopg import AsyncConnection, errors
@@ -20,7 +19,6 @@ from psycopg_pool import AsyncConnectionPool
 from .config import Settings
 from .errors import ApiError
 
-T = TypeVar("T")
 RETRYABLE = (errors.SerializationFailure, errors.DeadlockDetected)   # SQLSTATE 40001, 40P01
 MAX_RETRIES = 3                                                        # spec 2.14
 
@@ -56,7 +54,7 @@ async def fetchone(p: AsyncConnectionPool, query: str, params=None) -> dict | No
         return await cur.fetchone()
 
 
-async def in_transaction(p: AsyncConnectionPool, fn: Callable[[AsyncConnection], Awaitable[T]]) -> T:
+async def in_transaction[T](p: AsyncConnectionPool, fn: Callable[[AsyncConnection], Awaitable[T]]) -> T:
     """Run fn(conn) in one transaction; retry 40001/40P01 up to 3 times with jitter, then 503 (spec 2.14)."""
     for attempt in range(MAX_RETRIES + 1):
         try:

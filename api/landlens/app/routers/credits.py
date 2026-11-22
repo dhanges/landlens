@@ -88,13 +88,18 @@ async def unlock(request: Request, parcel_id: int = PARCEL_ID, user_id: int = De
                                  "RETURNING credit_balance", (user_id,))
         return UnlockResponse(unlocked=True, charged=1, credit_balance=(await cur.fetchone())["credit_balance"])
 
-    try:
-        return await in_transaction(pool, tx)
-    except pgerr.UniqueViolation as e:
-        if e.diag.constraint_name == "credit_ledger_idempotency_key_key":
-            raise ApiError(409, "idempotency_key_reused",
-                           "This Idempotency-Key was already used for another request.") from None
-        raise
+    for attempt in range(2):
+        try:
+            return await in_transaction(pool, tx)
+        except pgerr.UniqueViolation as e:
+            if e.diag.constraint_name == "credit_ledger_idempotency_key_key":
+                raise ApiError(409, "idempotency_key_reused",
+                               "This Idempotency-Key was already used for another request.") from None
+            # report_unlock_pkey: the row lock makes this unreachable, but if it ever fires, a second run sees the
+            # unlock and returns charged 0 (the primary key is the second layer against double charges).
+            if e.diag.constraint_name != "report_unlock_pkey" or attempt == 1:
+                raise
+    raise AssertionError("unreachable")
 
 
 class TopUpBody(BaseModel):

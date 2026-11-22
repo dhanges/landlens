@@ -7,7 +7,7 @@ SF5_DB := landlens_sf5
 # the bench service runs as the host user (results/*.csv not root-owned)
 BENCH := UID=$(shell id -u) GID=$(shell id -g) $(COMPOSE) run --rm
 
-.PHONY: up down seed verify migrate bench seed-sf5 bench-sf5
+.PHONY: up down seed verify migrate bench seed-sf5 bench-sf5 test concurrency
 
 # Build and start the stack; the one-shot `migrate` service applies the schema phase first (spec 2.17).
 up:
@@ -39,3 +39,11 @@ seed-sf5:
 
 bench-sf5:
 	$(BENCH) -e LANDLENS_DB_NAME=$(SF5_DB) bench landlens bench $(Q)
+
+# pytest on the 10-parcel fixture (spec 2.16), in its own landlens_test database. Subset: make test T="-k credits"
+test:
+	$(BENCH) --build test pytest -q tests $(T)
+
+# 1,000 parallel unlocks by a 10-credit user against the running stack via Caddy (spec 2.11)
+concurrency:
+	$(BENCH) test python tests/concurrency_unlock.py

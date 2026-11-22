@@ -1,0 +1,51 @@
+{
+  "requests": 1000,
+  "credits": 10,
+  "base": "http://caddy",
+  "wall_s": 9.692,
+  "statuses": {
+    "200": 10,
+    "402": 990
+  },
+  "error_codes": {
+    "402:insufficient_credits": 990
+  },
+  "latency_ms": {
+    "p50": 5934.4,
+    "p95": 8807.1,
+    "max": 9549.2
+  },
+  "db": {
+    "credit_balance": 0,
+    "ledger_sum": 0,
+    "report_unlock_rows": 10,
+    "ledger_unlock_rows": 10,
+    "ledger_unlock_parcels": 10
+  },
+  "winning_balances": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "checks": {
+    "exactly_10_charged_200s": true,
+    "no_uncharged_200s": true,
+    "others_are_402_or_503": true,
+    "every_503_has_retry_after": true,
+    "db_10_report_unlocks": true,
+    "db_10_ledger_unlocks_on_10_parcels": true,
+    "no_parcel_charged_twice": true,
+    "winners_match_unlock_rows": true,
+    "balance_zero": true,
+    "balance_equals_ledger_sum": true,
+    "replays_charge_0": true
+  },
+  "pass": true
+}
