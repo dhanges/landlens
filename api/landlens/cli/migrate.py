@@ -2,7 +2,7 @@
 
 - Applies db/migrations/NNN_*.sql in filename order, each in its own transaction.
 - Records filename and SHA-256 checksum in schema_migrations; refuses to run if an already-applied file changed.
-- Phases by file number: 010, 011, 012 form the post-load phase; every other file (001-009, 013) the schema phase.
+- Phases by file number: 010, 011, 012, 014 form the post-load phase; every other file (001-009, 013) the schema phase.
 - After the schema phase, sets the passwords of landlens_api / landlens_tiles from LANDLENS_API_PASSWORD /
   LANDLENS_TILES_PASSWORD when those are set, so no secret lives in a migration file (DEC-004).
 """
@@ -19,7 +19,7 @@ from psycopg import sql
 
 from landlens.db import connect
 
-POST_LOAD = {"010", "011", "012"}
+POST_LOAD = {"010", "011", "012", "014"}
 FILE_RE = re.compile(r"^(\d{3})_[a-z0-9_]+\.sql$")
 
 
