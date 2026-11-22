@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
-import { area, LAND_TYPE_LABEL, survey } from "@/lib/format";
+import { area, clean, LAND_TYPE_LABEL, survey } from "@/lib/format";
 import { useSearch } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +34,7 @@ export function SearchBox() {
     ...(res.data?.villages ?? []).map((v) => ({
       kind: "village" as const,
       id: v.village_id,
-      label: v.name,
+      label: clean(v.name),
       sub: `Village · ${v.mandal}`,
       lat: v.lat,
       lon: v.lon,
@@ -42,7 +42,7 @@ export function SearchBox() {
     ...(res.data?.parcels ?? []).map((p) => ({
       kind: "parcel" as const,
       id: p.parcel_id,
-      label: `Survey ${survey(p)}, ${p.village}`,
+      label: `Survey ${survey(p)}, ${clean(p.village)}`,
       sub: `${LAND_TYPE_LABEL[p.land_type]} · ${area(p.area_sqm)}`,
       lat: p.lat,
       lon: p.lon,

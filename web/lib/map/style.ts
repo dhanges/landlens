@@ -309,7 +309,11 @@ function labelLayers(k: ReturnType<typeof colours>): LayerSpecification[] {
       type: "symbol",
       source: "omt",
       "source-layer": "place",
-      filter: ["match", ["get", "class"], ["city", "town", "village", "suburb", "hamlet"], true, false],
+      filter: [
+        "any",
+        ["match", ["get", "class"], ["city", "town"], true, false],
+        ["all", [">=", ["zoom"], PARCEL_MIN_ZOOM], ["match", ["get", "class"], ["village", "suburb", "hamlet"], true, false]],
+      ],
       layout: {
         "text-field": NAME,
         "text-font": FONT,
@@ -398,7 +402,7 @@ function overlayLayers(k: ReturnType<typeof colours>, visible: Record<Overlay, b
       "source-layer": "villages",
       maxzoom: PARCEL_MIN_ZOOM,
       layout: vis("parcels"),
-      paint: { "fill-color": heat(k.border), "fill-opacity": 0.6 },
+      paint: { "fill-color": heat(k.border), "fill-opacity": 0.75 },
     },
     {
       id: "ll-villages-line",
@@ -462,12 +466,14 @@ function overlayLayers(k: ReturnType<typeof colours>, visible: Record<Overlay, b
           k.road,
         ],
         "line-width": [
-          "match",
-          ["get", "feature_type"],
-          "minor_road",
-          zoomWidth([[12, 1], [16, 4]]),
-          zoomWidth([[10, 1.5], [16, 8]]),
-        ] as unknown as ExpressionSpecification,
+          "interpolate",
+          ["exponential", 1.5],
+          ["zoom"],
+          10,
+          ["match", ["get", "feature_type"], "minor_road", 0.5, 1.5],
+          16,
+          ["match", ["get", "feature_type"], "minor_road", 4, 8],
+        ],
       },
     },
     {
@@ -502,7 +508,7 @@ function overlayLayers(k: ReturnType<typeof colours>, visible: Record<Overlay, b
       "source-layer": "villages",
       minzoom: 11,
       maxzoom: PARCEL_MIN_ZOOM,
-      layout: { ...vis("parcels"), "text-field": ["get", "name"], "text-font": FONT, "text-size": 12 },
+      layout: { ...vis("parcels"), "text-field": CLEAN_NAME, "text-font": FONT, "text-size": 12 },
       paint: halo,
     },
     {

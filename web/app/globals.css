@@ -174,3 +174,28 @@
     break-inside: avoid;
   }
 }
+
+/* MapLibre controls follow the theme (its CSS ships light-only colours). */
+.maplibregl-ctrl-group,
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  background: var(--surface) !important;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card) !important;
+}
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--border) !important;
+}
+.maplibregl-ctrl-attrib a {
+  color: var(--muted) !important;
+}
+[data-theme="dark"] .maplibregl-ctrl-icon,
+[data-theme="dark"] .maplibregl-ctrl-attrib-button {
+  filter: invert(0.9);
+}
+.maplibregl-ctrl-scale {
+  background: var(--surface);
+  color: var(--muted);
+  border-color: var(--muted);
+}
