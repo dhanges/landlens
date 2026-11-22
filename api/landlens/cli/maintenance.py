@@ -105,6 +105,17 @@ def verify() -> int:
                        UNION ALL SELECT 'village names', CASE WHEN name LIKE '[fallback]%%' THEN 'fallback' ELSE 'real' END,
                                         count(*) FROM village GROUP BY 2 ORDER BY 1, 2""")
         print("provenance: " + "; ".join(f"{t} {s}={n}" for t, s, n in cur.fetchall()))
+        cur.execute("""SELECT scale_factor, core_radius_m, corridor_halfwidth_m, expected_parcels,
+                              round((ST_Area(geom) / 1e6)::numeric, 1) FROM parcel_coverage ORDER BY 1""")
+        for sf, r, h, e, a in cur.fetchall():
+            print(f"parcel window SF{sf}: core radius {r} m, corridor half-width {h} m, {a} sq km, "
+                  f"expected {e:,} parcels at target sizes")
+        cur.execute("""SELECT u.email, u.credit_balance, coalesce(sum(l.delta), 0) FROM app_user u
+                       LEFT JOIN credit_ledger l USING (user_id) WHERE u.email = 'demo@landlens.local'
+                       GROUP BY u.email, u.credit_balance""")
+        demo = cur.fetchone()
+        print("demo account: " + (f"{demo[0]}, balance {demo[1]}, ledger sum {demo[2]}" if demo else "MISSING"))
+        ok &= demo is not None and demo[1] == demo[2]
         cur.execute("SELECT count(*) FROM sale_transaction_default")
         d = cur.fetchone()[0]
         print(f"rows in DEFAULT sale partition (should be 0): {d}")

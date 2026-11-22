@@ -26,8 +26,11 @@ TARGET_SQM = {"urban_plot": (150, 500), "peri_urban": (200, 4000), "agricultural
 PARCELS_PER_SF = 100_000           # SF1 = 100k, SF5 = 500k (spec 2.12)
 MIN_PARCEL_SQM = 50.0              # slivers below this are dropped [assumption]
 
-# --- demo window (DEC-004): radius around centres, half-width around each corridor, in metres
-WINDOW = {1: (4000.0, 2000.0), 5: (8000.0, 4000.0)}
+# --- demo window (DEC-004 shape; size computed per owner decision 2026-11-22): the core radius r and corridor
+# half-width r * CORRIDOR_RATIO grow together until the expected parcel count at the spec 2.12 mean target
+# sizes equals PARCELS_PER_SF * sf. Stored in parcel_coverage with the radii.
+CORRIDOR_RATIO = 1 / 3
+WINDOW_TOLERANCE = 0.002            # relative error on the expected count
 CORRIDOR_PROJECTS = ("Mamnoor airport", "NH-163 corridor", "Outer Ring Road")  # "the Hyderabad highway" = NH-163 [assumption, T-M1-11 confirms]
 
 ROAD_FRONTAGE_M = 15.0             # spec 2.12 step 5
@@ -72,3 +75,8 @@ GW_YEARS = range(2010, 2027)
 
 # --- zones (spec 2.12 step 7)
 ZONE_SEED_POINTS_PER_SF = 300
+
+# --- demo account (DEC-003, OQ-24): re-created on every seed; local demo only
+DEMO_EMAIL = "demo@landlens.local"
+DEMO_PASSWORD = "demolandlens"      # documented in the README; change before any hosted deployment
+DEMO_CREDITS = (("signup_bonus", 3), ("top_up", 7))

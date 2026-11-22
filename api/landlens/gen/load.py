@@ -79,8 +79,12 @@ def load_reference(conn, w: World) -> dict:
         stats["zone_type"] = copy_rows(cur, "zone_type", ("zone_code", "name", "permitted_uses"), w.zone_types)
         stats["plan_zone"] = copy_rows(cur, "plan_zone", ("plan_id", "zone_code", "geom", "source"),
                                        ((1, c, ewkb(g), "synthetic") for c, g in w.plan_zones))
-        cur.execute("INSERT INTO parcel_coverage (scale_factor, geom, source) VALUES (%s, %s::geometry, 'synthetic')",
-                    (max(1, int(round(w.sf))), ewkb(w.window)))
+        m = w.window_meta
+        cur.execute("""INSERT INTO parcel_coverage (scale_factor, geom, source, core_radius_m, corridor_halfwidth_m,
+                                                    expected_parcels)
+                       VALUES (%s, %s::geometry, 'synthetic', %s, %s, %s)""",
+                    (max(1, int(round(w.sf))), ewkb(w.window), m["core_radius_m"], m["corridor_halfwidth_m"],
+                     m["expected_parcels"]))
         stats["soil_sample"] = copy_rows(
             cur, "soil_sample",
             ("sampled_on", "ph", "organic_carbon_pct", "n_kg_ha", "p_kg_ha", "k_kg_ha", "texture", "geom", "source"),
@@ -192,3 +196,19 @@ def derive(conn) -> dict:
 def summary_counts(arr) -> dict:
     vals, counts = np.unique(arr, return_counts=True)
     return {LAND_TYPES[int(v)]: int(c) for v, c in zip(vals, counts, strict=True)}
+
+
+def demo_account(conn) -> dict:
+    """DEC-003 (OQ-24): demo account with 10 credits as ledger rows, so balance = SUM(ledger.delta)."""
+    from argon2 import PasswordHasher  # argon2id by default (spec 2.10)
+
+    from . import params
+
+    total = sum(d for _, d in params.DEMO_CREDITS)
+    with conn.cursor() as cur:
+        cur.execute("""INSERT INTO app_user (email, password_hash, credit_balance) VALUES (%s, %s, %s)
+                       RETURNING user_id""", (params.DEMO_EMAIL, PasswordHasher().hash(params.DEMO_PASSWORD), total))
+        uid = cur.fetchone()[0]
+        for reason, delta in params.DEMO_CREDITS:
+            cur.execute("INSERT INTO credit_ledger (user_id, delta, reason) VALUES (%s, %s, %s)", (uid, delta, reason))
+    return {"email": params.DEMO_EMAIL, "user_id": uid, "credits": total}

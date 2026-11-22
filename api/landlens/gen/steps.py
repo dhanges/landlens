@@ -53,6 +53,7 @@ class World:
     mandals: list = field(default_factory=list)    # dict(mandal_id, district_id, name, geom, boundary_source)
     districts: list = field(default_factory=list)
     window: object = None
+    window_meta: dict = field(default_factory=dict)
     parcels: dict = field(default_factory=dict)    # column arrays
     zone_types: list = field(default_factory=list)
     plan_zones: list = field(default_factory=list)  # (zone_code, geom)
@@ -113,20 +114,45 @@ def land_type_at(w: World, x, y, rng) -> np.ndarray:
 
 
 # ---------------------------------------------------------------- step 4: parcels in the demo window (DEC-004)
-def window_params(sf: float) -> tuple[float, float]:
-    (r1, h1), (r5, h5) = params.WINDOW[1], params.WINDOW[5]
-    t = min(max((sf - 1) / 4, 0.0), 1.0)
-    return r1 + t * (r5 - r1), h1 + t * (h5 - h1)
+def _land_type_zones(w: World) -> list:
+    """Study area split into the noise-free land-type bands of step 3 (urban < 4 km, peri < 15 km, agri beyond)."""
+    cs = list(w.layers.centres.values())
+    urban = shapely.union_all([c.buffer(params.URBAN_KM * 1000, quad_segs=32) for c in cs])
+    peri = shapely.union_all([c.buffer(params.PERI_KM * 1000, quad_segs=32) for c in cs])
+    return [urban.intersection(w.study_area), peri.difference(urban).intersection(w.study_area),
+            w.study_area.difference(peri)]
 
 
 def demo_window(w: World) -> None:
-    r, h = window_params(w.sf)
-    parts = [c.buffer(r, quad_segs=32) for c in w.layers.centres.values()]
+    """Size the window so the expected parcel count at the spec 2.12 mean target sizes equals the SF target."""
+    target = params.PARCELS_PER_SF * w.sf
+    mean_area = [float(np.mean(params.TARGET_SQM[t])) for t in LAND_TYPES]
+    zones = _land_type_zones(w)
+    centres = list(w.layers.centres.values())
     corridors = [p for p in w.projects if base_name(p) in params.CORRIDOR_PROJECTS]
-    parts += [p.geom.buffer(h, quad_segs=16) for p in corridors]
-    w.window = as_multi(shapely.union_all(parts).intersection(w.study_area))
-    w.notes.append(f"demo window: {r / 1000:.0f} km around centres + {h / 1000:.0f} km either side of "
-                   f"{len(corridors)} corridors = {w.window.area / 1e6:.0f} sq km")
+
+    def window(r):
+        parts = [c.buffer(r, quad_segs=32) for c in centres] + \
+                [p.geom.buffer(r * params.CORRIDOR_RATIO, quad_segs=16) for p in corridors]
+        return shapely.union_all(parts).intersection(w.study_area)
+
+    def expected(win):
+        return sum(win.intersection(z).area / a for z, a in zip(zones, mean_area, strict=True))
+
+    lo, hi = 50.0, 40_000.0
+    for _ in range(60):
+        r = (lo + hi) / 2
+        win = window(r)
+        e = expected(win)
+        if abs(e - target) / target < params.WINDOW_TOLERANCE:
+            break
+        lo, hi = (r, hi) if e < target else (lo, r)
+    w.window = as_multi(win)
+    w.window_meta = {"core_radius_m": round(r, 1), "corridor_halfwidth_m": round(r * params.CORRIDOR_RATIO, 1),
+                     "expected_parcels": int(round(e)), "area_sqkm": round(win.area / 1e6, 2)}
+    w.notes.append(f"demo window (computed): core radius {r / 1000:.2f} km, corridor half-width "
+                   f"{r * params.CORRIDOR_RATIO / 1000:.2f} km around {len(corridors)} corridors, "
+                   f"{win.area / 1e6:.1f} sq km, expected {e:,.0f} parcels at target sizes")
 
 
 def parcels(w: World, rng) -> None:

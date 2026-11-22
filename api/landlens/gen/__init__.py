@@ -41,6 +41,7 @@ def run(sf: float, seed: int) -> int:
         par = load.load_parcels(conn, w)
         sal = load.load_sales(conn, w)
         der = load.derive(conn)
+        demo = load.demo_account(conn)
         conn.commit()
         with conn.cursor() as cur:
             cur.execute("ANALYZE")
@@ -48,5 +49,7 @@ def run(sf: float, seed: int) -> int:
     print(f"  parcels: {par}")
     print(f"  sales: {sal}")
     print(f"  derived: {der}")
+    print(f"  demo account: {demo}")
+    print(f"  window: {w.window_meta}")
     print(f"gen done in {time.time() - t0:.0f}s")
     return 1 if par["failed_batches"] or sal["failed_batches"] else 0
