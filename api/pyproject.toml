@@ -4,19 +4,28 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "landlens-api"
-version = "0.0.0"
-description = "LandLens API (FastAPI)."
+version = "0.1.0"
+description = "LandLens API (FastAPI) and the landlens data CLI."
 requires-python = ">=3.12"
-# Dependencies limited to spec 2.1 for the M0 health step.
+# Exact pins (spec 2.1). Checked against OSV on 2026-11-22: no known vulnerabilities.
 dependencies = [
-    "fastapi>=0.111,<1.0",
-    "uvicorn>=0.30,<1.0",
-    "psycopg[binary]>=3.1,<4.0",
-    "pydantic>=2.6,<3.0",
+    "fastapi==0.165.0",
+    "uvicorn==0.54.0",
+    "psycopg[binary]==3.3.9",
+    "pydantic==2.14.4",
+    "numpy==2.5.4",
+    "shapely==2.2.0",
 ]
+
+[project.scripts]
+landlens = "landlens.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["landlens*"]
 
+[tool.setuptools.package-data]
+"landlens.gen" = ["*.ql"]
+
 [tool.ruff]
 target-version = "py312"
+line-length = 120

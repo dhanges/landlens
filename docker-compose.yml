@@ -44,6 +44,14 @@ services:
     environment:
       DATABASE_URL: postgresql://landlens_owner:${POSTGRES_PASSWORD}@db:5432/landlens_owner
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # `landlens migrate` sets the 013 role passwords from these (no secret in any migration file)
+      LANDLENS_API_PASSWORD: ${LANDLENS_API_PASSWORD}
+      LANDLENS_TILES_PASSWORD: ${LANDLENS_TILES_PASSWORD}
+      AS_OF_DATE: ${AS_OF_DATE:-}
+    # read-only inputs for the landlens CLI (migrations, DEC-006 seed_inputs); both inside landlens/
+    volumes:
+      - ./db/migrations:/app/migrations:ro
+      - ./seed_inputs:/app/seed_inputs:ro
     depends_on:
       db:
         condition: service_healthy
