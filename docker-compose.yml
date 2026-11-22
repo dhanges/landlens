@@ -27,13 +27,40 @@ services:
   # Vector tile server. In M0 there are no tile functions yet (M2), so Martin
   # starts with zero function sources; it connects as landlens_owner until 013
   # (T-M1-5) introduces the read-only landlens_tiles role (spec 2.10, 2.2).
-  martin:
-    image: ghcr.io/maplibre/martin:1.16.1
+  # One-shot schema phase (spec 2.17: make up runs the schema phase only). Runs before martin and api, so the
+  # landlens_tiles role and its password exist before martin connects as it.
+  migrate:
+    build: ./api
+    image: landlens-api:local
+    command: ["landlens", "migrate", "--phase", "schema"]
     environment:
       DATABASE_URL: postgresql://landlens_owner:${POSTGRES_PASSWORD}@db:5432/landlens_owner
+      LANDLENS_API_PASSWORD: ${LANDLENS_API_PASSWORD}
+      LANDLENS_TILES_PASSWORD: ${LANDLENS_TILES_PASSWORD}
+    volumes:
+      - ./db/migrations:/app/migrations:ro
     depends_on:
       db:
         condition: service_healthy
+    restart: "no"
+    networks:
+      - landlens
+
+  # Vector tile server (spec 2.2, ADR-007): read-only landlens_tiles role (spec 2.10), function sources only
+  # (martin/config.yaml), so no table is ever published directly. Restarted by `make seed` to discover the
+  # tile functions created by migration 012.
+  martin:
+    image: ghcr.io/maplibre/martin:1.16.1
+    command: ["--config", "/config.yaml"]
+    environment:
+      # expanded by Martin inside config.yaml (DATABASE_URL itself is deprecated in Martin 1.x)
+      MARTIN_PG_DSN: postgresql://landlens_tiles:${LANDLENS_TILES_PASSWORD}@db:5432/landlens_owner
+    configs:
+      - source: martin
+        target: /config.yaml
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     networks:
       - landlens
 
@@ -41,6 +68,7 @@ services:
   # exposes /api/health, which the healthcheck and Caddy both rely on.
   api:
     build: ./api
+    image: landlens-api:local
     environment:
       DATABASE_URL: postgresql://landlens_owner:${POSTGRES_PASSWORD}@db:5432/landlens_owner
       OPENAI_API_KEY: ${OPENAI_API_KEY}
@@ -52,9 +80,10 @@ services:
     volumes:
       - ./db/migrations:/app/migrations:ro
       - ./seed_inputs:/app/seed_inputs:ro
+      - ./bench:/app/bench            # benchmark queries (ro use) and results/*.csv (written by landlens bench)
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 5s
@@ -100,6 +129,8 @@ services:
 configs:
   caddyfile:
     file: ./Caddyfile
+  martin:
+    file: ./martin/config.yaml
 
 volumes:
   pgdata:

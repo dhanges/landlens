@@ -1,0 +1,8 @@
+# Martin config (spec 2.2, ADR-007): publish only the tile functions of migration 012, never raw tables.
+listen_addresses: "0.0.0.0:3000"
+postgres:
+  connection_string: ${MARTIN_PG_DSN}
+  auto_publish:
+    from_schemas: ["public"]
+    tables: false
+    functions: true

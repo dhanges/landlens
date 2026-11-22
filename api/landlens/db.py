@@ -13,4 +13,12 @@ def conninfo() -> str:
 
 
 def connect(autocommit: bool = False) -> psycopg.Connection:
-    return psycopg.connect(conninfo(), autocommit=autocommit)
+    """Connection with the session's as-of date set from AS_OF_DATE when given (DEC-004, OQ-27)."""
+    conn = psycopg.connect(conninfo(), autocommit=autocommit)
+    as_of = os.environ.get("AS_OF_DATE")
+    if as_of:
+        with conn.cursor() as cur:
+            cur.execute("SELECT set_config('landlens.as_of_date', %s, false)", (as_of,))
+        if not autocommit:
+            conn.commit()
+    return conn
