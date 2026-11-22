@@ -17,7 +17,7 @@ from landlens import __version__
 from landlens.app import config, errors
 from landlens.app.db import make_pool
 from landlens.app.ratelimit import SlidingWindow
-from landlens.app.routers import health
+from landlens.app.routers import auth, health
 from landlens.app.timing import TimingMiddleware
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"),
@@ -44,7 +44,7 @@ def create_app() -> FastAPI:
                   openapi_url="/api/openapi.json", redoc_url=None, lifespan=lifespan)
     errors.install(app)
     app.add_middleware(TimingMiddleware)
-    for r in (health,):
+    for r in (health, auth):
         app.include_router(r.router, prefix="/api")
     return app
 
