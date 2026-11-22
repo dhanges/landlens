@@ -42,7 +42,8 @@ bench-sf5:
 
 # pytest on the 10-parcel fixture (spec 2.16), in its own landlens_test database. Subset: make test T="-k credits"
 test:
-	$(BENCH) --build test pytest -q tests $(T)
+	$(COMPOSE) --profile tools build test
+	$(BENCH) test pytest -q tests $(T)
 
 # 1,000 parallel unlocks by a 10-credit user against the running stack via Caddy (spec 2.11)
 concurrency:
