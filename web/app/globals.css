@@ -2,51 +2,102 @@
 @tailwind components;
 @tailwind utilities;
 
-/* shadcn/ui (new-york, neutral base) design tokens. */
+/*
+ * LandLens design tokens (web/DESIGN.md). The only place colours are defined: Tailwind maps them
+ * (bg-surface, text-muted, ...), the shadcn/ui aliases point at them, and the MapLibre style reads the
+ * --map-* and --heat-* values at runtime (lib/map/style.ts). Light on :root, dark on [data-theme="dark"],
+ * which the blocking script in app/layout.tsx sets before first paint.
+ */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    color-scheme: light;
+    --bg: #f7f5f0;
+    --surface: #ffffff;
+    --border: #e3ded4;
+    --text: #1e2420;
+    --muted: #62675f;
+    --primary: #3f5e4a;
+    --on-primary: #ffffff;
+    --tint: #e7eee8;
+    --tint-text: #2e4537;
+    --accent: #7a5a40;
+    --accent-hover: #5c4330;
+    --up: #3f7a4e;
+    --down: #a8483a;
+    --heat-1: #dce6dd;
+    --heat-2: #a9c2ae;
+    --heat-3: #6f9479;
+    /* first or selected table row (Map mockup) */
+    --row-selected: #f3efe6;
+    --shadow-card: 0 1px 2px rgba(122, 90, 64, 0.1), 0 6px 16px -4px rgba(184, 134, 60, 0.25);
+
+    /* MapLibre topo base (DESIGN.md map table) */
+    --map-land: #eeeedf;
+    --map-farmland: #d3daa6;
+    --map-grass: #c2cd8c;
+    --map-forest: #afc07e;
+    --map-water: #8ed3e3;
+    --map-water-line: #2f8fa6;
+    --map-road: #ffffff;
+    --map-road-casing: #d3cebc;
+    --map-path: #6b5a3c;
+    --map-building: #cfcbc0;
+    --map-building-line: #a9a59a;
+    --map-label: #3b3f36;
+    --map-halo: #ffffff;
+
+    /* shadcn/ui aliases (components.json: cssVariables) */
+    --background: var(--bg);
+    --foreground: var(--text);
+    --card: var(--surface);
+    --card-foreground: var(--text);
+    --popover: var(--surface);
+    --popover-foreground: var(--text);
+    --primary-foreground: var(--on-primary);
+    --secondary: var(--tint);
+    --secondary-foreground: var(--tint-text);
+    --muted-foreground: var(--muted);
+    --destructive: var(--down);
+    --destructive-foreground: var(--on-primary);
+    --input: var(--border);
+    --ring: var(--primary);
     --radius: 0.5rem;
   }
 
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #121513;
+    --surface: #1a1f1c;
+    --border: #2b322d;
+    --text: #e7e5df;
+    --muted: #9aa096;
+    --primary: #8fb596;
+    --on-primary: #121513;
+    --tint: #22302a;
+    --tint-text: #b9d3bd;
+    --accent: #c9a07a;
+    --accent-hover: #dcb894;
+    --up: #7fbf8c;
+    --down: #e08a78;
+    --heat-1: #2a3a30;
+    --heat-2: #456552;
+    --heat-3: #6e9a7c;
+    --row-selected: #232b26;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 6px 16px -4px rgba(201, 160, 122, 0.12);
+
+    --map-land: #1e211b;
+    --map-farmland: #283022;
+    --map-grass: #303a26;
+    --map-forest: #2c3a24;
+    --map-water: #1f4650;
+    --map-water-line: #5fafc2;
+    --map-road: #3b4038;
+    --map-road-casing: #2a2e27;
+    --map-path: #b39a6c;
+    --map-building: #3a3a33;
+    --map-building-line: #4c4c43;
+    --map-label: #d8d8cc;
+    --map-halo: #1e211b;
   }
 }
 
@@ -54,7 +105,72 @@
   * {
     @apply border-border;
   }
+  html {
+    background: var(--bg);
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-bg font-sans text-text antialiased;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  a {
+    color: var(--accent);
+  }
+  a:hover {
+    color: var(--accent-hover);
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-serif font-medium;
+  }
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* card / tile / table container / floating map panel: 1px border, ochre lift */
+  .card {
+    @apply rounded-card border border-border bg-surface shadow-card;
+  }
+  .tile {
+    @apply rounded-tile border border-border bg-surface shadow-card;
+  }
+  /* numbers are always IBM Plex Mono with tabular figures */
+  .num {
+    @apply font-mono;
+    font-variant-numeric: tabular-nums;
+  }
+  .sr-only-label {
+    position: absolute;
+    left: -9999px;
+  }
+}
+
+/* Print to PDF (J2 step 4): the report alone, no chrome, light colours. */
+@media print {
+  :root,
+  [data-theme="dark"] {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --border: #d9d4c9;
+    --text: #1e2420;
+    --muted: #4f544c;
+    --primary: #3f5e4a;
+    --accent: #7a5a40;
+    --up: #3f7a4e;
+    --down: #a8483a;
+    --heat-2: #a9c2ae;
+    --shadow-card: none;
+    color-scheme: light;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .card,
+  .tile {
+    break-inside: avoid;
   }
 }
