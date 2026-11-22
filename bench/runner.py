@@ -27,7 +27,7 @@ HERE = Path(__file__).resolve().parent
 WARMUPS, RUNS = 2, 10
 TIMEOUT_S, SLOW_MS, SLOW_RUNS = 300, 20_000, 3   # slow baselines: fewer runs, timeouts recorded
 CASTS = {"pt": "geometry", "land_type": "land_type", "scr_type": "land_type", "scr_zones": "text[]",
-         "scr_max_proj": "numeric", "scr_min_cagr": "numeric", "scr_last_cagr": "numeric", "scr_last_id": "bigint",
+         "scr_max_proj": "numeric", "scr_min_cagr": "numeric", "scr_sel_min_cagr": "numeric", "scr_last_cagr": "numeric", "scr_last_id": "bigint",
          "pid": "bigint", "busy_pid": "bigint", "vid": "integer", "q_vec": "vector", "q_text": "text",
          "q_village": "text", "q_village_fragment": "text"}
 PARAM_RE = re.compile(r"(?<![:\w]):([a-z_]+)\b")
@@ -105,6 +105,14 @@ def context(cur) -> dict:
             break
         c["scr_min_cagr"] = round(c["scr_min_cagr"] - 0.02, 2)
     c["scr_matches"] = n
+    # selective variant (M2 fix): min CAGR at the 99th percentile of the rows matching the other filters
+    sel_where = where.replace("cagr_5y >= %(c)s", "cagr_5y IS NOT NULL")
+    cur.execute(f"SELECT percentile_disc(0.99) WITHIN GROUP (ORDER BY cagr_5y) FROM mv_parcel_metrics WHERE {sel_where}",
+                {"t": c["scr_type"], "z": c["scr_zones"], "p": c["scr_max_proj"]})
+    c["scr_sel_min_cagr"] = cur.fetchone()[0]
+    cur.execute(f"SELECT count(*) FROM mv_parcel_metrics WHERE {where}",
+                {"t": c["scr_type"], "z": c["scr_zones"], "p": c["scr_max_proj"], "c": c["scr_sel_min_cagr"]})
+    c["scr_sel_matches"] = cur.fetchone()[0]
     cur.execute(f"""SELECT cagr_5y, parcel_id FROM mv_parcel_metrics WHERE {where}
                     ORDER BY cagr_5y DESC, parcel_id DESC OFFSET 2449 LIMIT 1""",
                 {"t": c["scr_type"], "z": c["scr_zones"], "p": c["scr_max_proj"], "c": c["scr_min_cagr"]})
@@ -186,7 +194,8 @@ def main(argv: list[str]) -> int:
         conn.commit()
         print(f"bench at SF{sf}: point parcel {params['pid']} ({params['land_type']}), busiest parcel "
               f"{params['busy_pid']}, village {params['vid']}; screener {params['scr_type']} zones {params['scr_zones']} "
-              f"min_cagr {params['scr_min_cagr']} -> {params['scr_matches']} matches")
+              f"min_cagr {params['scr_min_cagr']} -> {params['scr_matches']} matches; selective min_cagr "
+              f"{params['scr_sel_min_cagr']} -> {params['scr_sel_matches']} matches")
         rows = []
         for path in sorted((HERE / "queries").glob("q*.sql")):
             qid = path.stem.upper()
@@ -226,11 +235,13 @@ def main(argv: list[str]) -> int:
         with out.open() as fh:
             kept = [r for r in csv.DictReader(fh) if r["query"] not in only]
         rows = sorted(kept + rows, key=lambda r: int(str(r["query"])[1:]))
-    with out.open("w", newline="") as fh:
+    tmp = out.with_suffix(".csv.tmp")   # write then rename: replaces the file even if another user owns it
+    with tmp.open("w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=FIELDS)
         w.writeheader()
         for r in rows:
             w.writerow({k: r.get(k, "") for k in FIELDS})
+    tmp.replace(out)
     print(f"wrote {out} ({len(rows)} rows)")
     return 0
 

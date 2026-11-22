@@ -4,6 +4,8 @@ COMPOSE := docker compose -f docker-compose.yml
 SF ?= 1
 SEED ?= 42
 SF5_DB := landlens_sf5
+# the bench service runs as the host user (results/*.csv not root-owned)
+BENCH := UID=$(shell id -u) GID=$(shell id -g) $(COMPOSE) run --rm
 
 .PHONY: up down seed verify migrate bench seed-sf5 bench-sf5
 
@@ -26,9 +28,9 @@ verify:
 migrate:
 	$(COMPOSE) exec -T api landlens migrate --phase all
 
-# Q1-Q9 benchmarks (spec 2.19) on the main database; writes bench/results/sf<N>.csv
+# Q1-Q9 benchmarks (spec 2.19) on the main database; writes bench/results/sf<N>.csv. Subset: make bench Q="Q2 Q6"
 bench:
-	$(COMPOSE) exec -T api landlens bench
+	$(BENCH) bench landlens bench $(Q)
 
 # SF5 in a second database on the same server (spec 3.3 M2)
 seed-sf5:
@@ -36,4 +38,4 @@ seed-sf5:
 	$(COMPOSE) exec -T -e LANDLENS_DB_NAME=$(SF5_DB) api landlens seed --sf 5 --seed $(SEED)
 
 bench-sf5:
-	$(COMPOSE) exec -T -e LANDLENS_DB_NAME=$(SF5_DB) api landlens bench
+	$(BENCH) -e LANDLENS_DB_NAME=$(SF5_DB) bench landlens bench $(Q)

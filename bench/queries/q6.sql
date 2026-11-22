@@ -1,5 +1,8 @@
 -- Q6: screener, 5 filters, page 1 and page 50 (spec 2.8). Base joins vs MV vs MV + covering index (I5);
 -- OFFSET vs keyset at page 50. Median and p95.
+-- M2 fix: selective-filter variants, with min CAGR raised to the 99th percentile of the matching rows
+-- (:scr_sel_min_cagr, computed by the runner), so fewer rows qualify than fit on a page and the planner can no
+-- longer stop a top-N scan early; with and without I5.
 -- variant: base_joins_page1
 WITH asof AS (SELECT landlens_as_of() AS d),
 active AS (SELECT j.project_id, j.geom FROM dev_project j
@@ -44,4 +47,14 @@ ORDER BY cagr_5y DESC, parcel_id DESC LIMIT 50 OFFSET 2450;
 SELECT parcel_id, village_name, area_sqm, price_sqm, cagr_5y, nearest_active_project_m FROM mv_parcel_metrics
 WHERE land_type = :scr_type AND zone_code = ANY(:scr_zones) AND nearest_active_project_m <= :scr_max_proj AND cagr_5y >= :scr_min_cagr AND gw_category <> 'over_exploited'
   AND (cagr_5y, parcel_id) < (:scr_last_cagr, :scr_last_id)
+ORDER BY cagr_5y DESC, parcel_id DESC LIMIT 50;
+-- variant: mv_no_covering_selective_page1
+-- setup: DROP INDEX pm_screener_ix
+SELECT parcel_id, village_name, area_sqm, price_sqm, cagr_5y, nearest_active_project_m FROM mv_parcel_metrics
+WHERE land_type = :scr_type AND zone_code = ANY(:scr_zones) AND nearest_active_project_m <= :scr_max_proj AND cagr_5y >= :scr_sel_min_cagr AND gw_category <> 'over_exploited'
+ORDER BY cagr_5y DESC, parcel_id DESC LIMIT 50;
+-- variant: mv_covering_selective_page1
+-- size: pm_screener_ix
+SELECT parcel_id, village_name, area_sqm, price_sqm, cagr_5y, nearest_active_project_m FROM mv_parcel_metrics
+WHERE land_type = :scr_type AND zone_code = ANY(:scr_zones) AND nearest_active_project_m <= :scr_max_proj AND cagr_5y >= :scr_sel_min_cagr AND gw_category <> 'over_exploited'
 ORDER BY cagr_5y DESC, parcel_id DESC LIMIT 50;

@@ -93,6 +93,25 @@ services:
     networks:
       - landlens
 
+  # Benchmark runner (spec 2.19): the api image as a one-off job (`make bench`). Runs as the host user, so
+  # bench/results/*.csv are not root-owned. Profile "tools": never started by `make up`.
+  bench:
+    image: landlens-api:local
+    profiles: ["tools"]
+    user: "${UID:-1000}:${GID:-1000}"
+    command: ["landlens", "bench"]
+    environment:
+      DATABASE_URL: postgresql://landlens_owner:${POSTGRES_PASSWORD}@db:5432/landlens_owner
+      AS_OF_DATE: ${AS_OF_DATE:-}
+      HOME: /tmp
+    volumes:
+      - ./bench:/app/bench
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - landlens
+
   # Next.js production build served with `next start` (not the dev server).
   web:
     build: ./web
