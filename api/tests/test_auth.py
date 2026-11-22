@@ -54,6 +54,10 @@ def test_login_me_logout(client):
     client.cookies.clear()
     me = client.get("/api/me", headers=h)
     assert me.status_code == 200 and me.json()["credit_balance"] == 3
+    sess = client.get("/api/auth/session", headers=h)
+    assert sess.status_code == 200 and sess.json()["user"] == me.json()
+    anon = client.get("/api/auth/session")
+    assert anon.status_code == 200 and anon.json() == {"user": None}
     out = client.post("/api/auth/logout", headers=h)
     assert out.status_code == 204 and "max-age=0" in out.headers["set-cookie"].lower()
 

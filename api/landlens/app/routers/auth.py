@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field, field_validator
 from ..db import fetchone, in_transaction
 from ..errors import ApiError
 from ..ratelimit import client_ip
-from ..security import clear, hash_password, issue, require_user, verify_password
+from ..security import clear, hash_password, issue, optional_user, require_user, verify_password
 
 router = APIRouter(tags=["auth"])
 SIGNUP_BONUS = 3
@@ -101,3 +101,14 @@ async def me(request: Request, user_id: int = Depends(require_user)) -> User:
     if u is None:
         raise ApiError(401, "auth_required", "This session's account no longer exists.")
     return User(**u)
+
+
+@router.get("/auth/session", tags=["auth"])
+async def session(request: Request, user_id: int | None = Depends(optional_user)) -> dict:
+    """The current user or null, always 200: lets the web app check for a session without a 401 in the browser
+    console on every signed-out page view. /me keeps its 401 contract."""
+    if user_id is None:
+        return {"user": None}
+    u = await fetchone(request.app.state.pool,
+                       "SELECT user_id, email, credit_balance FROM app_user WHERE user_id = %s", (user_id,))
+    return {"user": User(**u).model_dump() if u else None}

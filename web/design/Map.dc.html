@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LandLens map and screener</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Schibsted+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0}
+a{color:#7A5A40}a:hover{color:#5C4330}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: {{t.bg}}; color: {{t.tx}}; font-family: 'Schibsted Grotesk', sans-serif; font-size: 15px; line-height: 1.5">
+
+<header style="border-bottom: 1px solid {{t.bd}}; background: {{t.sf}}">
+<div style="padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 24px">
+<a href="Main.dc.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: {{t.tx}}">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{t.pr}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5L21 21"></path><path d="M7.5 12.5l2-2.5 1.5 1.5 2-3"></path></svg>
+<span style="font-family: 'Newsreader', serif; font-size: 22px; font-weight: 500">LandLens</span>
+</a>
+<label style="flex: 1 1 280px; max-width: 420px; display: flex; align-items: center; gap: 8px; border: 1px solid {{t.bd}}; border-radius: 8px; padding: 0 12px; height: 40px; background: {{t.bg}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.mu}}" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<span style="position: absolute; left: -9999px">Search</span>
+<input placeholder="Village or survey number, e.g. Hanamkonda" style="border: 0; outline: none; background: transparent; color: {{t.tx}}; font: inherit; flex: 1; min-width: 0">
+</label>
+<nav style="display: flex; gap: 18px; font-size: 15px">
+<a href="Map.dc.html" style="color: {{t.pr}}; text-decoration: none; font-weight: 500">Map</a>
+<a href="Map.dc.html" style="color: {{t.tx}}; text-decoration: none">Trends</a>
+<a href="Main.dc.html" style="color: {{t.tx}}; text-decoration: none">Pricing</a>
+</nav>
+<div style="margin-left: auto; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: {{t.mu}}">3 credits</span>
+<button onClick="{{toggle}}" aria-label="Toggle dark mode" style="width: 40px; height: 40px; border-radius: 8px; border: 1px solid {{t.bd}}; background: {{t.sf}}; color: {{t.tx}}; cursor: pointer; display: flex; align-items: center; justify-content: center">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+</button>
+</div>
+</div>
+</header>
+
+<div style="display: flex; flex-wrap: wrap; align-items: stretch">
+
+<aside style="flex: 1 1 280px; max-width: 320px; border-right: 1px solid {{t.bd}}; background: {{t.sf}}; padding: 20px 20px 28px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px">
+<h2 style="margin: 0; font-family: 'Newsreader', serif; font-weight: 500; font-size: 22px">Screener</h2>
+<a href="#" style="font-size: 13px">Reset</a>
+</div>
+<div style="font-size: 13px; color: {{t.mu}}; margin-bottom: 8px">Land type</div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px">
+<button style="font: inherit; font-size: 13px; padding: 6px 10px; border-radius: 6px; border: 1px solid {{t.bd}}; background: {{t.sf}}; color: {{t.tx}}">Urban plot</button>
+<button style="font: inherit; font-size: 13px; padding: 6px 10px; border-radius: 6px; border: 1px solid {{t.pr}}; background: {{t.ti}}; color: {{t.tt}}">Peri-urban</button>
+<button style="font: inherit; font-size: 13px; padding: 6px 10px; border-radius: 6px; border: 1px solid {{t.bd}}; background: {{t.sf}}; color: {{t.tx}}">Agricultural</button>
+</div>
+<label style="display: block; font-size: 13px; color: {{t.mu}}; margin-bottom: 6px">Master plan zone</label>
+<div style="border: 1px solid {{t.bd}}; border-radius: 8px; padding: 9px 12px; margin-bottom: 20px; display: flex; justify-content: space-between">Residential, Mixed use<span style="color: {{t.mu}}">▾</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; color: {{t.mu}}; margin-bottom: 6px"><span>Distance to an active project</span><span style="font-family: 'IBM Plex Mono', monospace; color: {{t.tx}}">3 km</span></div>
+<div style="height: 4px; border-radius: 2px; background: {{t.bd}}; margin: 10px 0 24px; position: relative"><div style="width: 30%; height: 4px; border-radius: 2px; background: {{t.pr}}"></div><div style="position: absolute; left: 30%; top: -7px; width: 18px; height: 18px; margin-left: -9px; border-radius: 9px; background: {{t.sf}}; border: 2px solid {{t.pr}}; box-sizing: border-box"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; color: {{t.mu}}; margin-bottom: 6px"><span>5-year growth, at least</span><span style="font-family: 'IBM Plex Mono', monospace; color: {{t.tx}}">10% a year</span></div>
+<div style="height: 4px; border-radius: 2px; background: {{t.bd}}; margin: 10px 0 24px; position: relative"><div style="width: 50%; height: 4px; border-radius: 2px; background: {{t.pr}}"></div><div style="position: absolute; left: 50%; top: -7px; width: 18px; height: 18px; margin-left: -9px; border-radius: 9px; background: {{t.sf}}; border: 2px solid {{t.pr}}; box-sizing: border-box"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; color: {{t.mu}}; margin-bottom: 6px"><span>Price vs village median</span><span style="font-family: 'IBM Plex Mono', monospace; color: {{t.tx}}">below 0%</span></div>
+<div style="height: 4px; border-radius: 2px; background: {{t.bd}}; margin: 10px 0 24px; position: relative"><div style="width: 45%; height: 4px; border-radius: 2px; background: {{t.pr}}"></div><div style="position: absolute; left: 45%; top: -7px; width: 18px; height: 18px; margin-left: -9px; border-radius: 9px; background: {{t.sf}}; border: 2px solid {{t.pr}}; box-sizing: border-box"></div></div>
+<label style="display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 24px"><input type="checkbox" checked> Exclude over-exploited groundwater</label>
+<button style="width: 100%; height: 44px; border: 0; border-radius: 8px; background: {{t.pr}}; color: {{t.on}}; font: inherit; font-weight: 500; cursor: pointer">Show 214 parcels</button>
+<p style="margin: 16px 0 0; font-size: 12px; color: {{t.mu}}">Sample data. Parcels cover the urban core and growth corridors.</p>
+</aside>
+
+<main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<div style="position: relative; height: 560px; background: {{t.land}}; overflow: hidden; border-bottom: 1px solid {{t.bd}}">
+<svg width="100%" height="100%" viewBox="0 0 1100 560" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Topographic map of parcels near Mamnoor, coloured by price">
+<rect width="1100" height="560" fill="{{t.land}}"></rect>
+<g stroke="{{t.halo}}" stroke-width="1" stroke-opacity="0.5">
+<polygon points="0,0 210,0 230,120 120,150 0,130" fill="{{t.f1}}"></polygon>
+<polygon points="0,150 110,165 140,300 0,320" fill="{{t.f2}}"></polygon>
+<polygon points="240,40 400,20 415,170 255,180" fill="{{t.f2}}"></polygon>
+<polygon points="600,0 720,0 700,150 590,170" fill="{{t.f1}}"></polygon>
+<polygon points="930,420 1100,400 1100,560 950,560" fill="{{t.f2}}"></polygon>
+<polygon points="0,380 200,370 230,560 0,560" fill="{{t.f1}}"></polygon>
+<polygon points="700,440 900,430 920,560 690,560" fill="{{t.f1}}"></polygon>
+<polygon points="1000,260 1100,240 1100,390 1010,400" fill="{{t.f1}}"></polygon>
+</g>
+<path d="M120 170c40-10 90 0 110 40s-10 70-60 80-80-10-90-50 0-62 40-70z" fill="{{t.forest}}"></path>
+<path d="M240 430c50-20 120-10 150 30s0 80-70 90-110-20-110-60 0-45 30-60z" fill="{{t.forest}}"></path>
+<path d="M740 0h360v150c-40 20-90 30-130 10s-60-60-110-60-90-30-120-100z" fill="{{t.water}}" stroke="{{t.waterS}}" stroke-width="2"></path>
+<path d="M880 170c-10 60 10 120-10 180s10 120 0 210" fill="none" stroke="{{t.waterS}}" stroke-width="2.5"></path>
+<g fill="none" stroke="{{t.roadC}}" stroke-linecap="round"><path d="M0 335 C 250 305, 500 345, 1100 255" stroke-width="16"></path><path d="M430 0 C 450 180, 470 380, 520 560" stroke-width="12"></path></g>
+<g fill="none" stroke="{{t.road}}" stroke-linecap="round"><path d="M0 335 C 250 305, 500 345, 1100 255" stroke-width="12"></path><path d="M430 0 C 450 180, 470 380, 520 560" stroke-width="8"></path><path d="M0 140 L1100 195 M0 475 L1100 432 M220 0 L262 560 M690 0 L655 560" stroke-width="4"></path></g>
+<g fill="none" stroke="{{t.path}}" stroke-width="2.5" stroke-dasharray="7 5" stroke-linecap="round">
+<path d="M40 20 C 80 60, 60 110, 130 140 S 210 220, 180 300"></path>
+<path d="M240 30 C 300 80, 380 60, 420 110"></path>
+<path d="M560 20 C 600 80, 640 100, 700 150 S 760 220, 820 230"></path>
+<path d="M60 380 C 120 420, 180 400, 230 470 S 300 540, 360 560"></path>
+<path d="M700 420 C 760 470, 840 450, 900 500"></path>
+</g>
+<path d="M0 295 C 250 265, 500 305, 1100 215" fill="none" stroke="{{t.path}}" stroke-width="2" stroke-dasharray="12 6" opacity="0.8"></path>
+<g fill="{{t.bld}}" stroke="{{t.bldS}}" stroke-width="0.8">
+<rect x="150" y="40" width="14" height="10"></rect><rect x="170" y="52" width="10" height="12"></rect><rect x="132" y="62" width="12" height="9"></rect><rect x="160" y="74" width="9" height="9"></rect>
+<rect x="590" y="190" width="10" height="8"></rect><rect x="606" y="186" width="12" height="10"></rect><rect x="596" y="204" width="9" height="9"></rect>
+<rect x="760" y="300" width="12" height="9"></rect><rect x="778" y="296" width="9" height="12"></rect><rect x="764" y="316" width="11" height="8"></rect><rect x="790" y="314" width="10" height="9"></rect>
+<rect x="320" y="372" width="10" height="9"></rect><rect x="336" y="380" width="12" height="9"></rect><rect x="310" y="388" width="9" height="10"></rect>
+<rect x="980" y="160" width="12" height="9"></rect><rect x="998" y="168" width="10" height="10"></rect><rect x="972" y="178" width="9" height="9"></rect>
+</g>
+<g stroke="{{t.sf}}" stroke-width="2" fill-opacity="0.9">
+<polygon points="270,200 340,195 345,260 275,268" fill="{{t.p2}}"></polygon>
+<polygon points="345,195 420,190 425,255 345,260" fill="{{t.p3}}"></polygon>
+<polygon points="275,268 345,260 350,320 280,326" fill="{{t.p1}}"></polygon>
+<polygon points="345,260 425,255 430,315 350,320" fill="{{t.p2}}"></polygon>
+<polygon points="480,200 560,196 566,262 486,266" fill="{{t.p3}}"></polygon>
+<polygon points="560,196 650,192 655,258 566,262" fill="{{t.p2}}"></polygon>
+<polygon points="486,266 566,262 570,322 490,326" fill="{{t.p3}}"></polygon>
+<polygon points="566,262 655,258 660,316 570,322" fill="{{t.p1}}"></polygon>
+<polygon points="490,350 580,346 586,420 494,426" fill="{{t.p2}}"></polygon>
+<polygon points="580,346 655,342 660,415 586,420" fill="{{t.p1}}"></polygon>
+<polygon points="700,200 800,206 796,280 696,276" fill="{{t.p2}}"></polygon>
+<polygon points="700,330 796,326 800,400 704,404" fill="{{t.p1}}"></polygon>
+<polygon points="270,350 350,346 355,420 276,424" fill="{{t.p1}}"></polygon>
+<polygon points="350,346 425,342 430,416 355,420" fill="{{t.p2}}"></polygon>
+</g>
+<polygon points="486,266 566,262 570,322 490,326" fill="none" stroke="{{t.br}}" stroke-width="3"></polygon>
+<rect x="940" y="300" width="120" height="70" rx="6" fill="none" stroke="{{t.br}}" stroke-width="2" stroke-dasharray="6 5"></rect>
+<g font-family="Schibsted Grotesk, sans-serif" font-size="13" fill="{{t.lab}}" stroke="{{t.halo}}" stroke-width="3" paint-order="stroke">
+<text x="1000" y="392" text-anchor="middle">Airport site (proposed)</text>
+<text x="940" y="60" text-anchor="middle" font-style="italic" fill="{{t.waterS}}">Waddepally tank</text>
+<text x="150" y="292">Inner Ring Road (planned)</text>
+<text x="40" y="360">NH-163</text>
+<text x="140" y="30">Mamnoor</text>
+<text x="600" y="182">Bheemaram</text>
+<text x="770" y="290">Nakkalagutta</text>
+<text x="180" y="225" font-style="italic" font-size="12">Reserve forest</text>
+</g>
+</svg>
+
+<div style="position: absolute; top: 16px; right: 16px; background: {{t.sf}}; border: 1px solid {{t.bd}}; border-radius: 10px; box-shadow: {{t.sh}}; padding: 12px 14px; font-size: 13px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-weight: 500; margin-bottom: 2px">Layers</div>
+<label style="display: flex; gap: 8px; align-items: center"><input type="checkbox" checked> Parcels</label>
+<label style="display: flex; gap: 8px; align-items: center"><input type="checkbox" checked> Development projects</label>
+<label style="display: flex; gap: 8px; align-items: center"><input type="checkbox"> Master plan zones</label>
+<label style="display: flex; gap: 8px; align-items: center"><input type="checkbox"> Water bodies</label>
+</div>
+
+<div style="position: absolute; left: 16px; bottom: 16px; background: {{t.sf}}; border: 1px solid {{t.bd}}; border-radius: 10px; box-shadow: {{t.sh}}; padding: 10px 14px; font-size: 12px; color: {{t.mu}}">
+<div style="margin-bottom: 6px">Price per sq m vs village median</div>
+<div style="display: flex; gap: 4px; align-items: center"><span style="width: 28px; height: 10px; background: {{t.p1}}; border-radius: 2px"></span><span style="width: 28px; height: 10px; background: {{t.p2}}; border-radius: 2px"></span><span style="width: 28px; height: 10px; background: {{t.p3}}; border-radius: 2px"></span><span style="margin-left: 6px">below · near · above</span></div>
+</div>
+
+<div style="position: absolute; left: 600px; top: 120px; width: 300px; background: {{t.sf}}; border: 1px solid {{t.bd}}; border-radius: 12px; box-shadow: {{t.sh}}; padding: 16px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<span style="font-family: 'Newsreader', serif; font-size: 20px; font-weight: 500">Survey 214/3</span>
+<span style="font-size: 12px; padding: 2px 8px; border-radius: 6px; background: {{t.ti}}; color: {{t.tt}}">Peri-urban</span>
+</div>
+<div style="font-size: 13px; color: {{t.mu}}; margin: 2px 0 12px">Mamnoor · 1,850 sq m · Residential zone</div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-top: 1px solid {{t.bd}}"><span style="color: {{t.mu}}">Village median</span><span style="font-family: 'IBM Plex Mono', monospace">₹17,250 /sq m</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-top: 1px solid {{t.bd}}"><span style="color: {{t.mu}}">5-year growth</span><span style="font-family: 'IBM Plex Mono', monospace; color: {{t.up}}">+12.4% a year</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-top: 1px solid {{t.bd}}"><span style="color: {{t.mu}}">Nearest active project</span><span style="font-family: 'IBM Plex Mono', monospace">1.2 km</span></div>
+<a href="Report.dc.html" style="display: block; text-align: center; margin-top: 12px; padding: 10px; border-radius: 8px; background: {{t.pr}}; color: {{t.on}}; text-decoration: none; font-weight: 500">Unlock full report · 1 credit</a>
+</div>
+</div>
+
+<div style="padding: 20px 24px 32px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px">
+<h2 style="margin: 0; font-family: 'Newsreader', serif; font-weight: 500; font-size: 22px">214 parcels match</h2>
+<span style="font-size: 13px; color: {{t.mu}}">Sorted by 5-year growth</span>
+</div>
+<div style="overflow-x: auto; border: 1px solid {{t.bd}}; border-radius: 10px; box-shadow: {{t.sh}}; background: {{t.sf}}">
+<table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px">
+<thead>
+<tr style="color: {{t.mu}}; font-size: 12px; text-align: left">
+<th style="padding: 10px 14px; font-weight: 500; border-bottom: 1px solid {{t.bd}}">Parcel</th>
+<th style="padding: 10px 14px; font-weight: 500; border-bottom: 1px solid {{t.bd}}">Village</th>
+<th style="padding: 10px 14px; font-weight: 500; border-bottom: 1px solid {{t.bd}}">Zone</th>
+<th style="padding: 10px 14px; font-weight: 500; border-bottom: 1px solid {{t.bd}}; text-align: right">Area, sq m</th>
+<th style="padding: 10px 14px; font-weight: 500; border-bottom: 1px solid {{t.bd}}; text-align: right">₹ / sq m</th>
+<th style="padding: 10px 14px; font-weight: 500; border-bottom: 1px solid {{t.bd}}; text-align: right">vs median</th>
+<th style="padding: 10px 14px; font-weight: 500; border-bottom: 1px solid {{t.bd}}; text-align: right">5y growth</th>
+<th style="padding: 10px 14px; font-weight: 500; border-bottom: 1px solid {{t.bd}}; text-align: right">Project</th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
+<tr style="background: {{r.bgc}}">
+<td style="padding: 10px 14px; border-bottom: 1px solid {{t.bd}}"><a href="Report.dc.html" style="color: {{t.br}}; text-decoration: none; font-weight: 500">{{r.id}}</a></td>
+<td style="padding: 10px 14px; border-bottom: 1px solid {{t.bd}}">{{r.v}}</td>
+<td style="padding: 10px 14px; border-bottom: 1px solid {{t.bd}}; color: {{t.mu}}">{{r.z}}</td>
+<td style="padding: 10px 14px; border-bottom: 1px solid {{t.bd}}; text-align: right; font-family: 'IBM Plex Mono', monospace">{{r.a}}</td>
+<td style="padding: 10px 14px; border-bottom: 1px solid {{t.bd}}; text-align: right; font-family: 'IBM Plex Mono', monospace">{{r.p}}</td>
+<td style="padding: 10px 14px; border-bottom: 1px solid {{t.bd}}; text-align: right; font-family: 'IBM Plex Mono', monospace; color: {{r.mc}}">{{r.m}}</td>
+<td style="padding: 10px 14px; border-bottom: 1px solid {{t.bd}}; text-align: right; font-family: 'IBM Plex Mono', monospace; color: {{t.up}}">{{r.g}}</td>
+<td style="padding: 10px 14px; border-bottom: 1px solid {{t.bd}}; text-align: right; font-family: 'IBM Plex Mono', monospace">{{r.d}}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+<div style="text-align: center; margin-top: 16px"><button style="font: inherit; padding: 10px 18px; border-radius: 8px; border: 1px solid {{t.bd}}; background: {{t.sf}}; color: {{t.tx}}; cursor: pointer">Load more</button></div>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.state && this.state.dark !== undefined ? this.state.dark : !!this.props.dark;
+    const L = {sh:'0 1px 2px rgba(122,90,64,0.10), 0 6px 16px -4px rgba(184,134,60,0.25)',bg:'#F7F5F0',sf:'#FFFFFF',bd:'#E3DED4',tx:'#1E2420',mu:'#62675F',pr:'#3F5E4A',on:'#FFFFFF',ti:'#E7EEE8',tt:'#2E4537',br:'#7A5A40',up:'#3F7A4E',dn:'#A8483A',land:'#EEEEDF',f1:'#D3DAA6',f2:'#C2CD8C',forest:'#AFC07E',bld:'#CFCBC0',bldS:'#A9A59A',path:'#6B5A3C',road:'#FFFFFF',roadC:'#D3CEBC',water:'#8ED3E3',waterS:'#2F8FA6',lab:'#3B3F36',halo:'#FFFFFF',p1:'#DCE6DD',p2:'#A9C2AE',p3:'#6F9479',sel:'#F3EFE6'};
+    const D = {sh:'0 1px 2px rgba(0,0,0,0.5), 0 6px 16px -4px rgba(201,160,122,0.12)',bg:'#121513',sf:'#1A1F1C',bd:'#2B322D',tx:'#E7E5DF',mu:'#9AA096',pr:'#8FB596',on:'#121513',ti:'#22302A',tt:'#B9D3BD',br:'#C9A07A',up:'#7FBF8C',dn:'#E08A78',land:'#1E211B',f1:'#283022',f2:'#303A26',forest:'#2C3A24',bld:'#3A3A33',bldS:'#4C4C43',path:'#B39A6C',road:'#3B4038',roadC:'#2A2E27',water:'#1F4650',waterS:'#5FAFC2',lab:'#D8D8CC',halo:'#1E211B',p1:'#2A3A30',p2:'#456552',p3:'#6E9A7C',sel:'#232B26'};
+    const t = dark ? D : L;
+    const data = [
+      ['214/3','Mamnoor','Residential','1,850','₹16,980','−1.6%','+12.4%','1.2 km'],
+      ['188/1A','Mamnoor','Residential','2,120','₹15,400','−10.7%','+12.4%','1.9 km'],
+      ['77/4','Nakkalagutta','Mixed use','640','₹24,100','−3.2%','+11.8%','2.4 km'],
+      ['301/2','Bheemaram','Residential','3,480','₹9,850','−6.1%','+11.1%','0.8 km'],
+      ['56/7B','Hasanparthy','Residential','1,240','₹11,200','−0.9%','+10.3%','2.9 km']];
+    const rows = data.map((d, i) => ({ id: d[0], v: d[1], z: d[2], a: d[3], p: d[4], m: d[5], g: d[6], d: d[7], mc: t.tx, bgc: i === 0 ? t.sel : 'transparent' }));
+    return { t, rows, toggle: () => this.setState({ dark: !dark }) };
+  }
+}
+</script>
+</body>
+</html>
