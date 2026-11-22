@@ -20,7 +20,9 @@ PARCEL_ID = Path(ge=1, le=2**63 - 1)
 
 SUMMARY = """
 SELECT p.parcel_id, p.village_id, v.name AS village, v.mandal_id, m.name AS mandal, p.survey_no, p.sub_div,
-       p.land_type, p.area_sqm, pm.zone_code, pm.village_median_sqm, pm.price_sqm, pm.cagr_5y, p.source,
+       p.land_type, p.area_sqm, pm.zone_code, zt.name AS zone_name, pm.village_median_sqm, pm.price_sqm,
+       pm.price_vs_median_pct, pm.cagr_5y, pm.nearest_active_project_m, j.name AS nearest_active_project, p.source,
+       ST_AsGeoJSON(ST_Transform(p.geom, 4326), 6)::json AS geometry,
        round(ST_Y(ST_Transform(p.centroid, 4326))::numeric, 6) AS lat,
        round(ST_X(ST_Transform(p.centroid, 4326))::numeric, 6) AS lon,
        (%(uid)s::bigint IS NOT NULL AND EXISTS (SELECT 1 FROM report_unlock r
@@ -29,6 +31,8 @@ FROM parcel p
 JOIN village v USING (village_id)
 JOIN mandal m USING (mandal_id)
 LEFT JOIN mv_parcel_metrics pm USING (parcel_id)
+LEFT JOIN zone_type zt ON zt.zone_code = pm.zone_code
+LEFT JOIN dev_project j ON j.project_id = pm.nearest_active_project_id
 WHERE p.parcel_id = %(pid)s"""
 
 AT = """
@@ -65,5 +69,6 @@ async def parcel_at(request: Request, lat: float = Query(ge=-90, le=90), lon: fl
 @router.get("/parcels/{parcel_id}/summary")
 async def parcel_summary(request: Request, parcel_id: int = PARCEL_ID,
                          user_id: int | None = Depends(optional_user)) -> dict:
-    """Free summary: village, land type, area, primary zone, village median price, and whether you unlocked it."""
+    """Free summary: village, land type, area, primary zone, village median price, 5-year growth, nearest active
+    project, the outline (GeoJSON, WGS84) and whether you unlocked it."""
     return await summary_row(request.app.state.pool, parcel_id, user_id)

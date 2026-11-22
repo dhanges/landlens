@@ -32,11 +32,13 @@ def test_connects_as_api_role(owner, client):
 def test_search_villages_and_survey_numbers(client):
     v = client.get("/api/search", params={"q": "Hanmakonda"}).json()      # FR-2 transliteration variant
     assert [x["village_id"] for x in v["villages"]] == [101] and v["villages"][0]["mandal"] == "Alpha Mandal"
+    assert isinstance(v["villages"][0]["lat"], float) and isinstance(v["villages"][0]["lon"], float)
     assert client.get("/api/search", params={"q": "kazi"}).json()["villages"][0]["name"] == "Kazipet"
     assert sorted(p["parcel_id"] for p in client.get("/api/search", params={"q": "1"}).json()["parcels"]) == [1, 9]
     within = client.get("/api/search", params={"q": "1", "village_id": 102}).json()["parcels"]
     assert [p["parcel_id"] for p in within] == [9]
-    assert [p["parcel_id"] for p in client.get("/api/search", params={"q": "6/B"}).json()["parcels"]] == [7]
+    hit = client.get("/api/search", params={"q": "6/B"}).json()["parcels"]
+    assert [p["parcel_id"] for p in hit] == [7] and isinstance(hit[0]["lat"], float)
     assert [p["parcel_id"] for p in client.get("/api/search", params={"q": "6"}).json()["parcels"]] == [6, 7]
     assert client.get("/api/search", params={"q": "100%_"}).json() == {"villages": [], "parcels": []}
     assert client.get("/api/search", params={"q": ""}).status_code == 422
@@ -57,6 +59,10 @@ def test_parcels_at_and_summary(client, owner):
     assert s["parcel_id"] == 1 and s["village"] == "Hanamkonda" and s["land_type"] == "peri_urban"
     assert s["area_sqm"] == 10000 and s["zone_code"] == "R" and s["unlocked"] is False
     assert s["village_median_sqm"] == 5500        # median of 5000, 6000, 4500, 7000 (36 months to 2026-11-25)
+    assert s["nearest_active_project_m"] == 450 and s["nearest_active_project"] == "Test Ring Road"
+    assert s["price_vs_median_pct"] == pytest.approx(100 * (6000 / 5500 - 1), abs=0.01)
+    assert s["geometry"]["type"] == "Polygon" and len(s["geometry"]["coordinates"][0]) == 5
+    assert s["zone_name"] is not None
     assert client.get("/api/parcels/3/summary").json()["zone_code"] == "C"     # 75% C beats 25% R
     assert client.get("/api/parcels/at", params={"lat": 95, "lon": 0}).status_code == 422
     r = client.get("/api/parcels/999/summary")
@@ -112,6 +118,11 @@ def test_screener_each_filter(client):
     assert ids(screen(client, filters={"max_highway_m": 600})) == [1, 2, 3, 6, 7, 9, 10]
     assert ids(screen(client, filters={"min_cagr_5y": 0.2, "land_type": "peri_urban"})) == [1, 2, 3, 4, 5]
     assert ids(screen(client, filters={"mandal_id": [2]})) == [9, 10]
+    # price vs village median: P1 +9.1%, P2 -9.1%, P3 -18.2%, P4 -45.5%, P5 +27.3% (median 5500); P9 0% (102)
+    assert ids(screen(client, filters={"land_type": "peri_urban", "max_price_vs_median_pct": 0})) == [2, 3, 4, 9]
+    row = next(i for i in screen(client, filters={"land_type": "peri_urban"})["items"] if i["parcel_id"] == 4)
+    assert row["survey_no"] == "4" and row["sub_div"] == "" and isinstance(row["lat"], float)
+    assert row["price_vs_median_pct"] == pytest.approx(100 * (3000 / 5500 - 1), abs=0.01)
     assert ids(screen(client, filters={"zone_code[]": ["A"]})) == [9, 10]           # spec 2.9 spelling accepted
     high = screen(client, filters={"min_soil_score": 60})["items"]
     assert high and all(i["soil_score"] >= 60 for i in high)
@@ -137,7 +148,7 @@ def test_screener_options(client):
     assert [z["zone_code"] for z in o["zones"]] == ["A", "C", "R"]
     assert o["ranges"]["parcels"] == 10 and o["ranges"]["area_sqm_max"] == 90000
     assert {s["sort"] for s in o["sorts"]} == {"cagr_5y", "price_sqm", "area_sqm", "nearest_active_project_m"}
-    assert len(o["filters"]) == 12 and [m["mandal_id"] for m in o["mandals"]] == [1, 2]
+    assert len(o["filters"]) == 13 and [m["mandal_id"] for m in o["mandals"]] == [1, 2]
 
 
 def test_village_trend_gaps_and_guideline(client):

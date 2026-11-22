@@ -57,6 +57,7 @@ def test_valuation_widened_low_confidence(client, make_user):
     assert v["confidence"] == "low" and v["n_comparables"] == 5
     assert v["search_radius_m"] == 10000 and v["search_months"] == 60
     assert [c["parcel_id"] for c in rep["comparables"]] == [2, 4, 3, 5, 9]           # KNN order
+    assert [(c["survey_no"], c["village"]) for c in rep["comparables"]][:2] == [("2", "Hanamkonda"), ("4", "Hanamkonda")]
     assert [c["distance_m"] for c in rep["comparables"]] == [200, 300, 450, pytest.approx(2828.4, abs=0.1), 4000]
     exp = sorted(expected_p1())
     q = statistics.quantiles(exp, n=4, method="inclusive")
@@ -137,6 +138,8 @@ def test_report_zoning_location_history_provenance(client, make_user):
     assert loc["nearest_active_project"] == {"project_id": 1, "name": "Test Ring Road"}
     statuses = {p["name"]: p["status"] for p in loc["projects_within_10km"]}
     assert statuses == {"Test Ring Road": "sanctioned", "Test Airport": "shelved", "Future Scheme": None}
+    announced = {p["name"]: p["announced_on"] for p in loc["projects_within_10km"]}
+    assert announced == {"Test Ring Road": "2020-01-01", "Test Airport": "2021-01-01", "Future Scheme": None}
     assert [s["registered_on"] for s in rep["price_history"]] == ["2019-06-01", "2025-03-01"]
     assert [s["median_price_sqm"] for s in rep["locality_trend"]["series"]] == [4000, 3000, 5000, 5250, 7000]
     prov = rep["provenance"]

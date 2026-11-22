@@ -36,7 +36,9 @@ SELECT j.project_id, j.name, j.project_type::text AS project_type, i.distance_m,
        j.source::text AS source,
        (SELECT h.status::text FROM project_status_history h
         WHERE h.project_id = j.project_id AND h.effective_from <= landlens_as_of()
-        ORDER BY h.effective_from DESC LIMIT 1) AS status
+        ORDER BY h.effective_from DESC LIMIT 1) AS status,
+       (SELECT min(h.effective_from) FROM project_status_history h
+        WHERE h.project_id = j.project_id AND h.effective_from <= landlens_as_of()) AS announced_on
 FROM parcel_project_impact i JOIN dev_project j USING (project_id)
 WHERE i.parcel_id = %s ORDER BY i.distance_m, j.project_id LIMIT 10"""
 
@@ -109,7 +111,8 @@ async def build(pool: AsyncConnectionPool, parcel_id: int) -> dict | None:
                                    "trend": gw}}
     if lt != "urban_plot":
         environment["soil"] = {"soil_score": loc["soil_score"], "nearest_samples": soil}
-    comparables = [{"parcel_id": c.parcel_id, "village_id": c.village_id, "registered_on": c.registered_on,
+    comparables = [{"parcel_id": c.parcel_id, "village_id": c.village_id, "village": c.village,
+                    "survey_no": c.survey_no, "sub_div": c.sub_div, "registered_on": c.registered_on,
                     "price_sqm": round(c.price_sqm, 2), "adjusted_price_sqm": round(c.adjusted_price_sqm, 2),
                     "distance_m": round(c.distance_m, 1), "area_sqm": c.area_sqm,
                     "factors": {k: round(v, 4) for k, v in c.factors.items()}} for c in comps]

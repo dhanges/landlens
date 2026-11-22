@@ -20,14 +20,18 @@ WORD_SIMILARITY_THRESHOLD = "0.4"
 SURVEY_RE = re.compile(r"^\s*(\d{1,6})\s*(?:[/-]\s*([A-Za-z0-9]{1,8}))?\s*$")
 
 VILLAGES = """
-SELECT v.village_id, v.name, m.name AS mandal, round(word_similarity(%(q)s, v.name)::numeric, 3) AS similarity
+SELECT v.village_id, v.name, m.name AS mandal, round(word_similarity(%(q)s, v.name)::numeric, 3) AS similarity,
+       round(ST_Y(ST_Transform(ST_PointOnSurface(v.geom), 4326))::numeric, 6) AS lat,
+       round(ST_X(ST_Transform(ST_PointOnSurface(v.geom), 4326))::numeric, 6) AS lon
 FROM village v JOIN mandal m USING (mandal_id)
 WHERE %(q)s <%% v.name OR v.name ILIKE %(pat)s
 ORDER BY similarity DESC, v.name
 LIMIT %(lim)s"""
 
 PARCELS = """
-SELECT p.parcel_id, p.village_id, v.name AS village, p.survey_no, p.sub_div, p.land_type, p.area_sqm
+SELECT p.parcel_id, p.village_id, v.name AS village, p.survey_no, p.sub_div, p.land_type, p.area_sqm,
+       round(ST_Y(ST_Transform(p.centroid, 4326))::numeric, 6) AS lat,
+       round(ST_X(ST_Transform(p.centroid, 4326))::numeric, 6) AS lon
 FROM parcel p JOIN village v USING (village_id)
 WHERE p.survey_no = %(sn)s
   AND (%(sd)s::text IS NULL OR p.sub_div = %(sd)s)
@@ -44,7 +48,8 @@ def _like_pattern(q: str) -> str:
 async def search(request: Request, q: str = Query(min_length=1, max_length=100),
                  limit: int = Query(10, ge=1, le=50),
                  village_id: int | None = Query(None, ge=1, le=2**31 - 1)) -> dict:
-    """Fuzzy village search, plus survey-number matches when q looks like one."""
+    """Fuzzy village search, plus survey-number matches when q looks like one. Each hit has a WGS84 point
+    (village: a point on its surface; parcel: its centroid) for the map to fly to."""
     pool = request.app.state.pool
     q = q.strip()
     async def villages_tx(conn):

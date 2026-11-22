@@ -31,8 +31,13 @@ router = APIRouter(tags=["screener"])
 
 SORTS = {"cagr_5y": "desc", "price_sqm": "asc", "area_sqm": "desc", "nearest_active_project_m": "asc"}
 COLUMNS = ("parcel_id, village_id, village_name, mandal_id, land_type, zone_code, area_sqm, price_sqm, "
-           "village_median_sqm, cagr_5y, nearest_active_project_m, nearest_highway_m, gw_category, soil_score, "
-           "guideline_rate_sqm")
+           "village_median_sqm, price_vs_median_pct, cagr_5y, nearest_active_project_m, nearest_highway_m, "
+           "gw_category, soil_score, guideline_rate_sqm")
+# survey number and a WGS84 point per returned row, looked up for the page only (the keyset query stays on the view)
+PAGE_EXTRA = """
+SELECT parcel_id, survey_no, sub_div, round(ST_Y(ST_Transform(centroid, 4326))::numeric, 6) AS lat,
+       round(ST_X(ST_Transform(centroid, 4326))::numeric, 6) AS lon
+FROM parcel WHERE parcel_id = ANY(%s)"""
 OPTIONS_TTL_S = 300
 
 
@@ -48,6 +53,7 @@ class Filters(BaseModel):
     max_active_project_m: float | None = Field(None, ge=0)
     max_highway_m: float | None = Field(None, ge=0)
     min_cagr_5y: float | None = Field(None, ge=-1, le=10)
+    max_price_vs_median_pct: float | None = Field(None, ge=-100, le=1000)
     exclude_gw: list[GwCategory] | None = Field(None, max_length=4,
                                                 validation_alias=AliasChoices("exclude_gw", "exclude_gw[]"))
     min_soil_score: float | None = Field(None, ge=0, le=100)
@@ -66,6 +72,7 @@ FRAGMENTS = {
     "max_active_project_m": "nearest_active_project_m <= %(max_active_project_m)s",
     "max_highway_m": "nearest_highway_m <= %(max_highway_m)s",
     "min_cagr_5y": "cagr_5y >= %(min_cagr_5y)s",
+    "max_price_vs_median_pct": "price_vs_median_pct <= %(max_price_vs_median_pct)s",
     "exclude_gw": "(gw_category IS NULL OR gw_category <> ALL(%(exclude_gw)s::gw_category[]))",
     "min_soil_score": "soil_score >= %(min_soil_score)s",
     "mandal_id": "mandal_id = ANY(%(mandal_id)s::smallint[])",
@@ -152,6 +159,11 @@ async def screener(body: ScreenerRequest, request: Request) -> dict:
                                      f"ORDER BY parcel_id {direction} LIMIT {want - len(rows)}", p)
 
     items = rows[: body.limit]
+    if items:
+        extra = {r["parcel_id"]: r for r in await fetchall(pool, PAGE_EXTRA, ([i["parcel_id"] for i in items],))}
+        for i in items:
+            e = extra.get(i["parcel_id"], {})
+            i.update(survey_no=e.get("survey_no"), sub_div=e.get("sub_div"), lat=e.get("lat"), lon=e.get("lon"))
     next_cursor = None
     if len(rows) > body.limit:
         last = items[-1]
@@ -167,7 +179,9 @@ SELECT min(area_sqm) AS area_sqm_min, max(area_sqm) AS area_sqm_max,
        min(cagr_5y) AS cagr_5y_min, max(cagr_5y) AS cagr_5y_max,
        min(nearest_active_project_m) AS active_project_m_min, max(nearest_active_project_m) AS active_project_m_max,
        min(nearest_highway_m) AS highway_m_min, max(nearest_highway_m) AS highway_m_max,
-       min(soil_score) AS soil_score_min, max(soil_score) AS soil_score_max, count(*) AS parcels
+       min(soil_score) AS soil_score_min, max(soil_score) AS soil_score_max,
+       min(price_vs_median_pct) AS price_vs_median_pct_min, max(price_vs_median_pct) AS price_vs_median_pct_max,
+       count(*) AS parcels
 FROM mv_parcel_metrics"""
 
 

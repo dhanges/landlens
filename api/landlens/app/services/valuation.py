@@ -62,6 +62,9 @@ class Comp:
     registered_on: date
     price_sqm: float
     distance_m: float
+    survey_no: str | None = None
+    sub_div: str | None = None
+    village: str | None = None
     factors: dict = field(default_factory=dict)
     adjusted_price_sqm: float | None = None
 
@@ -132,7 +135,8 @@ FROM parcel p LEFT JOIN mv_parcel_metrics pm USING (parcel_id) WHERE p.parcel_id
 
 COMPARABLES = """
 SELECT p.parcel_id, p.village_id, p.area_sqm, p.road_frontage_m, pm.nearest_active_project_m,
-       t.registered_on, t.price_sqm, ST_Distance(p.centroid, %(pt)s::geometry) AS distance_m
+       t.registered_on, t.price_sqm, ST_Distance(p.centroid, %(pt)s::geometry) AS distance_m,
+       p.survey_no, p.sub_div, pm.village_name AS village
 FROM parcel p
 JOIN LATERAL (
   SELECT s.registered_on, s.consideration_inr / s.area_sqm AS price_sqm FROM sale_transaction s
