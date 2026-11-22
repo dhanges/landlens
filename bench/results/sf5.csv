@@ -1,0 +1,24 @@
+scale_factor,query,variant,median_ms,p95_ms,runs,plan_nodes,indexes_used,shared_hit,shared_read,index_size_mb,rows,note
+5,Q1,seq_scan,223.356,256.035,10,Gather|Seq Scan,,15464,0,,1,DROP INDEX parcel_geom_gix
+5,Q1,gist,0.107,0.13,10,Index Scan,parcel_geom_gix,7,0,19.55,1,
+5,Q2,no_index,44115.986,44461.384,3,Aggregate|Hash|Hash Join|Materialize|Nested Loop|Seq Scan|Sort,,15471,0,,1,slow variant: 3 timed runs after 1 warm-up; DROP INDEX parcel_geom_gix; DROP INDEX project_geom_gix; DROP INDEX project_status_active_ix
+5,Q2,gist,33871.839,36425.544,3,Aggregate|Hash|Hash Join|Index Scan|Nested Loop|Seq Scan|Sort,parcel_geom_gix,1194624,0,19.55,1,slow variant: 3 timed runs after 1 warm-up; DROP INDEX project_status_active_ix
+5,Q2,gist_partial,33493.673,34658.876,3,Aggregate|Hash|Hash Join|Index Scan|Nested Loop|Seq Scan|Sort,parcel_geom_gix,1194624,0,19.57,1,slow variant: 3 timed runs after 1 warm-up
+5,Q3,order_by_st_distance,2041.476,2172.095,10,Bitmap Heap Scan|Bitmap Index Scan|Gather|Index Scan|Limit|Merge Append|Nested Loop|Sort,parcel_centroid_gix|sale_transaction_2023_parcel_id_registered_on_idx|sale_transaction_2024_parcel_id_registered_on_idx|sale_transaction_2025_parcel_id_registered_on_idx|sale_transaction_2026_parcel_id_registered_on_idx|sale_transaction_2027_parcel_id_registered_on_idx|sale_transaction_default_parcel_id_registered_on_idx,2748485,0,,10,
+5,Q3,knn,568.47,704.498,10,Index Scan|Limit|Merge Append|Nested Loop,parcel_centroid_gix|sale_transaction_2023_parcel_id_registered_on_idx|sale_transaction_2024_parcel_id_registered_on_idx|sale_transaction_2025_parcel_id_registered_on_idx|sale_transaction_2026_parcel_id_registered_on_idx|sale_transaction_2027_parcel_id_registered_on_idx|sale_transaction_default_parcel_id_registered_on_idx,345,0,19.59,10,
+5,Q4,no_index,121.975,249.236,10,Append|Gather|Seq Scan|Sort,,20006,0,,18,DROP INDEX sale_parcel_date_ix
+5,Q4,composite_btree,0.222,0.356,10,Append|Index Scan|Seq Scan|Sort,sale_transaction_2010_parcel_id_registered_on_idx|sale_transaction_2011_parcel_id_registered_on_idx|sale_transaction_2012_parcel_id_registered_on_idx|sale_transaction_2013_parcel_id_registered_on_idx|sale_transaction_2014_parcel_id_registered_on_idx|sale_transaction_2015_parcel_id_registered_on_idx|sale_transaction_2016_parcel_id_registered_on_idx|sale_transaction_2017_parcel_id_registered_on_idx|sale_transaction_2018_parcel_id_registered_on_idx|sale_transaction_2019_parcel_id_registered_on_idx|sale_transaction_2020_parcel_id_registered_on_idx|sale_transaction_2021_parcel_id_registered_on_idx|sale_transaction_2022_parcel_id_registered_on_idx|sale_transaction_2023_parcel_id_registered_on_idx|sale_transaction_2024_parcel_id_registered_on_idx|sale_transaction_2025_parcel_id_registered_on_idx|sale_transaction_2026_parcel_id_registered_on_idx,69,0,53.27,18,
+5,Q5,raw_aggregation,350.942,423.211,10,Aggregate|Append|Gather Merge|Hash|Hash Join|Index Scan|Seq Scan|Sort|WindowAgg,parcel_village_id_survey_no_sub_div_key,25471,0,,17,
+5,Q5,materialized_view,0.029,0.057,10,Index Scan,mv_village_price_index_village_id_land_type_yr_idx,3,0,,17,
+5,Q5,refresh_concurrently,3989.9,3989.9,1,,,,,,,REFRESH MATERIALIZED VIEW CONCURRENTLY mv_village_price_index
+5,Q6,base_joins_page1,13087.595,14483.394,10,Aggregate|Append|CTE Scan|Hash|Hash Join|Index Scan|Limit|Materialize|Merge Join|Nested Loop|Result|Seq Scan|Sort|Subquery Scan|Unique,parcel_village_id_survey_no_sub_div_key|parcel_zone_pkey|plan_zone_pkey,2434982,0,,50,
+5,Q6,mv_no_covering_page1,142.605,161.355,10,Gather Merge|Limit|Seq Scan|Sort,,10134,0,,50,DROP INDEX pm_screener_ix
+5,Q6,mv_covering_page1,143.964,160.312,10,Gather Merge|Limit|Seq Scan|Sort,,10134,0,32.06,50,
+5,Q6,mv_covering_page50_offset,166.951,172.524,10,Gather Merge|Limit|Seq Scan|Sort,,10134,0,,50,
+5,Q6,mv_covering_page50_keyset,107.262,136.13,10,Gather Merge|Index Scan|Limit|Sort,pm_screener_ix,11207,0,,50,
+5,Q7,no_index,19.761,28.834,10,Aggregate|Seq Scan,,1180,0,,1,DROP INDEX sale_date_brin; SET LOCAL enable_indexscan = off; SET LOCAL enable_indexonlyscan = off; SET LOCAL enable_bitmapscan = off
+5,Q7,btree,10.566,14.236,10,Aggregate|Index Scan,sale_transaction_2024_registered_on_idx,318,0,12.43,1,DROP INDEX sale_date_brin; CREATE INDEX bench_sale_date_btree ON sale_transaction (registered_on)
+5,Q7,brin,15.82,19.171,10,Aggregate|Bitmap Heap Scan|Bitmap Index Scan,sale_transaction_2024_registered_on_idx,386,0,0.45,1,
+5,Q8,-,,,,,,,,,,skipped: document_chunk empty
+5,Q9,ilike,0.197,0.24,10,Limit|Seq Scan,,6,0,,1,DROP INDEX village_name_trgm
+5,Q9,trigram_gin,0.565,0.687,10,Limit|Seq Scan|Sort,,6,0,0.04,0,

@@ -25,6 +25,7 @@ from landlens.db import connect
 
 HERE = Path(__file__).resolve().parent
 WARMUPS, RUNS = 2, 10
+TIMEOUT_S, SLOW_MS, SLOW_RUNS = 300, 20_000, 3   # slow baselines: fewer runs, timeouts recorded
 CASTS = {"pt": "geometry", "land_type": "land_type", "scr_type": "land_type", "scr_zones": "text[]",
          "scr_max_proj": "numeric", "scr_min_cagr": "numeric", "scr_last_cagr": "numeric", "scr_last_id": "bigint",
          "pid": "bigint", "busy_pid": "bigint", "vid": "integer", "q_vec": "vector", "q_text": "text",
@@ -127,16 +128,26 @@ def explain(cur, sql_text: str, params: dict) -> dict:
 def run_variant(conn, qid: str, v: dict, params: dict, sf: int) -> dict:
     row = {"scale_factor": sf, "query": qid, "variant": v["name"], "note": ""}
     with conn.transaction(force_rollback=True), psycopg.ClientCursor(conn) as cur:
-        cur.execute("SET LOCAL statement_timeout = '300s'")
+        cur.execute(f"SET LOCAL statement_timeout = '{TIMEOUT_S}s'")
         for s in v["setup"]:
             cur.execute(s)
         if any(s.upper().startswith(("DROP INDEX", "CREATE INDEX")) for s in v["setup"]):
             cur.execute("ANALYZE")       # plans should see the changed index set
-        times, last = [], None
-        for i in range(WARMUPS + RUNS):
-            last = explain(cur, v["sql"], params)
-            if i >= WARMUPS:
+        times, last, note = [], None, []
+        warmups, runs = WARMUPS, RUNS
+        i = 0
+        while i < warmups + runs:
+            try:
+                last = explain(cur, v["sql"], params)
+            except psycopg.errors.QueryCanceled:
+                row.update(note=f"timed out after {TIMEOUT_S} s" + (f"; {'; '.join(v['setup'])}" if v["setup"] else ""))
+                return row
+            if i == 0 and last["Execution Time"] > SLOW_MS:      # slow baseline: 1 warm-up + 3 timed runs
+                warmups, runs = 1, SLOW_RUNS
+                note.append(f"slow variant: {SLOW_RUNS} timed runs after 1 warm-up")
+            if i >= warmups:
                 times.append(last["Execution Time"])
+            i += 1
         nodes, idx = set(), set()
         walk(last["Plan"], nodes, idx)
         size = 0.0
@@ -150,8 +161,7 @@ def run_variant(conn, qid: str, v: dict, params: dict, sf: int) -> dict:
                    runs=len(times), plan_nodes="|".join(sorted(nodes)), indexes_used="|".join(sorted(idx)),
                    shared_hit=last["Plan"].get("Shared Hit Blocks", 0), shared_read=last["Plan"].get("Shared Read Blocks", 0),
                    index_size_mb=round(size / 1024 / 1024, 2) if v["size"] else "", rows=last["Plan"].get("Actual Rows"))
-        if v["setup"]:
-            row["note"] = "; ".join(v["setup"])
+        row["note"] = "; ".join(note + v["setup"])
     return row
 
 
@@ -193,8 +203,11 @@ def main(argv: list[str]) -> int:
                     continue
                 r = run_variant(conn, qid, v, params, sf)
                 rows.append(r)
-                print(f"{qid} {v['name']:<28} median {r['median_ms']:>10.3f} ms  p95 {r['p95_ms']:>10.3f} ms  "
-                      f"{r['indexes_used'] or r['plan_nodes']}")
+                if "median_ms" in r:
+                    print(f"{qid} {v['name']:<28} median {r['median_ms']:>10.3f} ms  p95 {r['p95_ms']:>10.3f} ms  "
+                          f"{(r['indexes_used'] or r['plan_nodes'])[:80]}")
+                else:
+                    print(f"{qid} {v['name']:<28} {r['note']}")
             if spec["refresh"]:
                 conn.autocommit = True
                 t0 = time.perf_counter()
