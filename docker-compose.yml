@@ -71,6 +71,10 @@ services:
     image: landlens-api:local
     environment:
       DATABASE_URL: postgresql://landlens_owner:${POSTGRES_PASSWORD}@db:5432/landlens_owner
+      # the server itself connects as the least-privilege landlens_api role (spec 2.10); the CLI keeps DATABASE_URL
+      API_DATABASE_URL: postgresql://landlens_api:${LANDLENS_API_PASSWORD}@db:5432/landlens_owner
+      JWT_SECRET: ${JWT_SECRET:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       # `landlens migrate` sets the 013 role passwords from these (no secret in any migration file)
       LANDLENS_API_PASSWORD: ${LANDLENS_API_PASSWORD}

@@ -16,7 +16,13 @@ dependencies = [
     "numpy==2.5.4",
     "shapely==2.2.0",
     "argon2-cffi==25.1.0",
+    "psycopg-pool==3.3.3",
+    "pyjwt==2.15.1",
 ]
+# Checked against OSV on 2026-11-22 (M3): psycopg-pool, pyjwt, pytest, httpx have no known vulnerabilities.
+
+[project.optional-dependencies]
+test = ["pytest==9.2.0", "httpx==0.28.1"]
 
 [project.scripts]
 landlens = "landlens.cli:main"

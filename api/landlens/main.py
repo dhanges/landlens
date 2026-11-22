@@ -1,68 +1,52 @@
-"""LandLens FastAPI application.
+"""LandLens FastAPI application (spec 2.9).
 
-M0 scaffolding: the app exposes only GET /api/health. All endpoints live under
-``/api`` and the interactive docs are served at ``/api/docs`` (spec 2.9).
+All endpoints are JSON under ``/api``; interactive docs at ``/api/docs``. The server connects as ``landlens_api``
+(spec 2.10) through an async pool opened in the lifespan; errors share one shape (app/errors.py); every request
+is logged with its duration (app/timing.py).
 """
 
 from __future__ import annotations
 
+import logging
 import os
+from contextlib import asynccontextmanager
 
-import psycopg
-from fastapi import APIRouter, FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI
 
 from landlens import __version__
+from landlens.app import config, errors
+from landlens.app.db import make_pool
+from landlens.app.ratelimit import SlidingWindow
+from landlens.app.routers import health
+from landlens.app.timing import TimingMiddleware
 
-app = FastAPI(
-    title="LandLens API",
-    version=__version__,
-    docs_url="/api/docs",
-    openapi_url="/api/openapi.json",
-    redoc_url=None,
-)
-
-router = APIRouter(prefix="/api")
+logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"),
+                    format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
 
-class HealthResponse(BaseModel):
-    """Health of the backing services (spec 2.9)."""
-
-    db: str
-    openai: str
-
-
-def _db_ok() -> bool:
-    """Return True when the database answers ``SELECT 1`` via psycopg 3.
-
-    Connection settings come from the standard libpq environment variables
-    (PGHOST, PGUSER, ...); ``DATABASE_URL`` overrides them when set.
-    """
-    conninfo = os.environ.get("DATABASE_URL", "")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    s = config.load()
+    app.state.settings = s
+    app.state.auth_limiter = SlidingWindow(s.rate_auth_per_min, s.rate_window_s)
+    app.state.chat_limiter = SlidingWindow(s.rate_chat_per_min, s.rate_window_s)
+    app.state.cache = {}
+    app.state.pool = make_pool(s)
+    await app.state.pool.open(wait=False)
     try:
-        with psycopg.connect(conninfo, connect_timeout=5) as conn, conn.cursor() as cur:
-            cur.execute("SELECT 1")
-            return cur.fetchone() == (1,)
-    except psycopg.Error:
-        return False
+        yield
+    finally:
+        await app.state.pool.close()
 
 
-def _openai_status() -> str:
-    """Report OpenAI health without any external spend (M0, harness cost policy).
-
-    We never call the OpenAI API here: "ok" merely means a key is configured;
-    an unset ``OPENAI_API_KEY`` reports "degraded" (graceful fallback, spec 2.1).
-    """
-    return "ok" if os.environ.get("OPENAI_API_KEY") else "degraded"
-
-
-@router.get("/health", response_model=HealthResponse)
-def health() -> HealthResponse:
-    """Liveness of the database and OpenAI dependency."""
-    return HealthResponse(
-        db="ok" if _db_ok() else "error",
-        openai=_openai_status(),
-    )
+def create_app() -> FastAPI:
+    app = FastAPI(title="LandLens API", version=__version__, docs_url="/api/docs",
+                  openapi_url="/api/openapi.json", redoc_url=None, lifespan=lifespan)
+    errors.install(app)
+    app.add_middleware(TimingMiddleware)
+    for r in (health,):
+        app.include_router(r.router, prefix="/api")
+    return app
 
 
-app.include_router(router)
+app = create_app()
