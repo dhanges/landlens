@@ -23,7 +23,8 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("verify", help="M1 verification: row counts, spatial consistency, invalid geometry, point query")
     sub.add_parser("checksum", help="per-table content checksums (determinism)")
     sub.add_parser("ingest-pdf", help="ingest the corpus PDFs (M5, not implemented yet)")
-    sub.add_parser("bench", help="run benchmarks (M2, not implemented yet)")
+    p = sub.add_parser("bench", help="run the Q1-Q9 benchmarks (spec 2.19); writes bench/results/sf<N>.csv")
+    p.add_argument("queries", nargs="*", help="optional subset, e.g. Q1 Q6")
     a = ap.parse_args(argv)
 
     from . import maintenance, migrate
@@ -46,6 +47,11 @@ def main(argv: list[str] | None = None) -> int:
             if rc:
                 return rc
         return 0
+    if a.cmd == "bench":
+        import os
+        import runpy
+        bench = os.environ.get("LANDLENS_BENCH_DIR", "/app/bench")
+        return runpy.run_path(f"{bench}/runner.py", run_name="landlens_bench")["main"](a.queries)
     if a.cmd in ("refresh", "partitions", "verify", "checksum"):
         return getattr(maintenance, a.cmd)()
     print(f"landlens {a.cmd}: not implemented yet", file=sys.stderr)
