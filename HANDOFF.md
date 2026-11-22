@@ -1,4 +1,4 @@
-# LandLens handoff (M0-M3, 2026-11-22)
+# LandLens handoff (M0-M4, 2026-11-22)
 
 Spec: `docs/` (PRD, Tech Spec, Roadmap, ADRs). Owner decisions `registry/decisions/DEC-*` override it.
 
@@ -19,6 +19,12 @@ Spec: `docs/` (PRD, Tech Spec, Roadmap, ADRs). Owner decisions `registry/decisio
   trends; valuation service and `/parcels/{id}/report` (402 report_locked); unlock (spec 2.11 transaction,
   Idempotency-Key required), mock top-up, ledger. 34 pytest tests on a 10-parcel fixture; concurrency harness
   passed (10 charged, 990 x 402, 0 x 503, balance 0 = ledger sum; `bench/results/concurrency_unlock.json`).
+- **M4** Next.js frontend in `web/` matching `web/DESIGN.md` + `web/design/` mockups: tokens (light/dark CSS
+  variables -> Tailwind + shadcn aliases), next/font, logo, no-flash theme toggle; pages `/` (landing), `/map`
+  (screener + MapLibre + results), `/parcels/[id]` (locked preview, unlock, full report, print), `/trends`,
+  `/pricing` (mock top-up), `/account` (ledger), `/login`, `/signup`; loading/empty/error states everywhere.
+  Migration 014 slims tiles (densest z14 574 KB -> 142 KB; `bench/results/tile_weight_sf1.csv`).
+  Screenshots: `report/screenshots/m4/`.
 
 ## How to run (from landlens/, with your .env)
 ```
@@ -29,6 +35,8 @@ make bench         # Q1-Q9 at the main DB's SF (~5 min at SF1); subset: make ben
 make seed-sf5 && make bench-sf5   # second database landlens_sf5 (~10 min + ~30 min)
 make test          # pytest in its own landlens_test database (~15 s; builds the test image); T="-k credits"
 make concurrency   # 1,000 parallel unlocks against the running stack via Caddy (~15 s; needs make seed)
+docker compose up -d --build --no-deps --wait web   # after changing web code (production build, ~2 min)
+cd web && LANDLENS_DEV_PROXY=http://localhost npm run dev -- -p 3001   # hot reload; /api and /tiles via Caddy
 ```
 After changing API code: `docker compose up -d --build --wait api` (tests mount the working tree; the server
 runs the built image). API docs: `http://localhost/api/docs`.
@@ -60,6 +68,18 @@ Demo login: demo@landlens.local / demolandlens (local only; 10 credits).
 | Report adds `section_order`; signup returns 201 | b9bddac |
 | Idempotency-Key reused for a different unlock -> 409 `idempotency_key_reused`; non-UUID -> 422 `invalid_idempotency_key`; top-up accepts an optional key | f3258cd |
 | Load-test user: signup (+3) then a `top_up` +7 ledger row by owner SQL, like the demo account | 7df3ce4 |
+| Tiles (014, post-load): parcels carry only `h` (heat class vs village median, +-10%); z14 merged into one MultiPolygon per class (half-pixel simplification, extent 1024); z15+ one feature per parcel with `parcel_id` as feature id; villages get `h` (tercile) | b6407ac |
+| API additions for the UI: lat/lon on search hits, summary outline/zone name/nearest project/price_vs_median, screener `max_price_vs_median_pct` filter + survey/lat/lon per row, comparables' survey/village, projects' `announced_on` | 0ff1caa |
+| `GET /auth/session` (always 200, `{user|null}`) so signed-out pages log no 401; `/me` unchanged | e55f960 |
+| `make test` builds the test image, then runs without `--build` (that flag recreated db each run) | 88e3e4f |
+| Map: own style on OpenFreeMap (OpenMapTiles schema) coloured from DESIGN.md tokens rather than a recoloured copy; labels in Schibsted Grotesk via MapLibre 6 `font-faces` (woff2 in `web/public/fonts`) | 15b4d12 |
+| maplibre-gl 6 worker copied to `web/public/maplibre/` at dev/build (`setWorkerUrl`) | 15b4d12 |
+| Parcel outline 0.4 px at z14 growing to the DESIGN 2 px at z16 (parcels are 3-5 px wide at z14) | 15b4d12 |
+| Screener slider bounds from `/screener/options` ranges; panel edits are pending until "Show N parcels" (live count) | 51e4dc1 |
+| Map clicks go through `/parcels/at`; screener results drawn as dots at centroids | 51e4dc1 |
+| `[fallback] ` name prefixes stripped in the UI; data stays tagged, UI shows Sample data / Synthetic badges | 51e4dc1 |
+| Report: valuation first (mockup order); agricultural parcels show Soil and water first (OQ-22). Header actions: Locality trends + Print to PDF (watchlist not built); optional asking-price marker; comparables add an Adjusted column | f3e828e |
+| Pricing: 5 / 20 / 50 packs (DEC-004); landing shows Free, 5, 20 as in the mockup | 4b9ae0a |
 
 ## Open fallbacks (all `source='synthetic'`, names `[fallback] ...`; see `seed_inputs/README.md`)
 - `seed_inputs/osm/*.json`: missing -> synthetic villages, radial roads, road grid, tanks, amenities.
@@ -72,17 +92,24 @@ Demo login: demo@landlens.local / demolandlens (local only; 10 credits).
 - Corpus PDFs and the land-use map JPG are not in the repo yet; OQ-36 (OCR) is open.
 
 ## Known issues
-- **Tile size**: a dense z14 parcel tile is ~574 KB, 454 ms cold vs the 200 ms warm p95 target (SM-3).
-  `tiles_parcels` is spec 2.8 verbatim; per-zoom simplification (spec 2.18) is M6 work.
+- **Tile size** (fixed in 014): densest SF1 tiles 142 KB (z14) / 134 KB (z15) raw, 23 ms warm; cold z14 is still
+  ~0.45 s (the merge step), the target is warm p95. SF5 tiles not measured.
 - **JWT_SECRET is shorter than 32 bytes**: PyJWT logs InsecureKeyLengthWarning in the api container. Put a
   longer random value in `.env` (e.g. `openssl rand -hex 32`); not changed here (.env is off limits).
 - **Unlock throughput**: 1,000 parallel unlocks take ~10 s (p50 5.9 s). 1,000 lock-free `GET /api/me` take
   5.6 s on this setup even without Caddy, so the ceiling is general request throughput (2 workers, one
   httpx client process), and the row lock adds about 2x. No latency target exists for unlocks.
-- **OQ-25 browser check not done**: Secure cookie over http://localhost is untested in Chrome/Firefox (curl
-  and httpx-over-https only). If login does not stick in a browser, set COOKIE_SECURE=false.
-- **Unexplained db container recreation**: during one `docker compose up -d --build --wait api` (07:54 GMT)
-  Compose recreated `db` (same image, volume kept, data intact); the pool reconnected on its own.
+- **OQ-25 done**: on http://localhost (Caddy and the dev server) Chromium 1.65 / Firefox 159 store and send the
+  Secure + HttpOnly + SameSite=Lax cookie; COOKIE_SECURE stays true.
+- **db recreation explained and fixed**: `docker compose run --build test` recreated db every time (88e3e4f).
+- **M4 journeys** (Chromium + Firefox, light + dark, production build via Caddy): J1, J2, J4, J5 pass with no
+  console errors. **J3 fails**: document Q&A needs M5 (`/chat`, ingestion); the report shows a disabled
+  "Ask the master plan" card. J1 caveat: at SF1 every peri-urban parcel is within 354 m of an active project
+  and grows 10.3-17.8% a year, so J1's literal 3 km / 10% filters exclude only 3 parcels.
+- Clicking the map where there is no parcel returns a 404 from `/parcels/at`, which browsers log as a console
+  error (the card shows the reason). Responsive layout below 900 px is coded but not walked.
+- Village fills (below z14) are faint in dark mode; heat tokens are low-contrast on the dark land colour.
+- Landing "See a sample report" opens parcel 1's locked preview; the landing parcel card is static sample data.
 - Survey-number search without `village_id` scans `parcel` (no index on survey_no alone; ~100k rows at SF1).
 - `/screener/options` is cached 5 min per worker; it goes stale after a re-seed until then.
 - Watchlist (OQ-09 stretch), `/chat` and `/documents/{id}/file` (M5) are not built.
@@ -94,7 +121,7 @@ Demo login: demo@landlens.local / demolandlens (local only; 10 credits).
 - Q9 trigram unused on 185 villages.
 - `harness/` and `registry/` are frozen since direct building started; their task statuses are stale.
 
-## Next: M4
-Frontend: map (MapLibre + Martin sources, click-to-summary), screener, report, trends, landing, pricing.
-Remaining M3-adjacent items: watchlist API (stretch), the three-version concurrency demo for the report
-(broken / row lock / SERIALIZABLE, spec 2.11), the OQ-25 browser cookie check.
+## Next: M5
+RAG: `landlens ingest-pdf`, `/api/chat` (hybrid retrieval, not-found rule, citations, degraded mode), the chat
+panel (wire the report's Ask card), the 25-question eval. Still open: watchlist (stretch), the three-version
+concurrency demo (spec 2.11), SF5 bench re-run and SF5 tile sizes.
