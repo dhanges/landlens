@@ -14,6 +14,7 @@ from typing import TypeVar
 from fastapi import Request
 from psycopg import AsyncConnection, errors
 from psycopg.rows import dict_row
+from psycopg.types.numeric import FloatLoader
 from psycopg_pool import AsyncConnectionPool
 
 from .config import Settings
@@ -24,6 +25,11 @@ RETRYABLE = (errors.SerializationFailure, errors.DeadlockDetected)   # SQLSTATE 
 MAX_RETRIES = 3                                                        # spec 2.14
 
 
+async def _configure(conn: AsyncConnection) -> None:
+    # numeric -> float, so JSON carries numbers, not strings (money fits float64 exactly to the paisa)
+    conn.adapters.register_loader("numeric", FloatLoader)
+
+
 def make_pool(s: Settings) -> AsyncConnectionPool:
     options = f"-c statement_timeout={s.statement_timeout_ms}"
     if s.as_of_date:
@@ -31,7 +37,7 @@ def make_pool(s: Settings) -> AsyncConnectionPool:
     return AsyncConnectionPool(
         s.database_url, min_size=s.pool_min, max_size=s.pool_max, timeout=s.pool_timeout_s, open=False,
         kwargs={"row_factory": dict_row, "options": options, "application_name": "landlens_api"},
-        name="landlens_api")
+        configure=_configure, name="landlens_api")
 
 
 def pool(request: Request) -> AsyncConnectionPool:
