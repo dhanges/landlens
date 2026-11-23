@@ -53,12 +53,25 @@ def owner(database):
 
 
 @pytest.fixture(scope="session")
-def app(database):
+def seed_dir(tmp_path_factory):
+    """Stand-in for seed_inputs/ (documents are served from here); tests write PDFs into docs/."""
+    d = tmp_path_factory.mktemp("seed_inputs")
+    (d / "docs").mkdir()
+    os.environ["LANDLENS_SEED_INPUTS"] = str(d)
+    return d
+
+
+@pytest.fixture(scope="session")
+def app(database, seed_dir):
     os.environ["API_DATABASE_URL"] = _url(database, "landlens_api", os.environ["LANDLENS_API_PASSWORD"])
     os.environ.setdefault("JWT_SECRET", "test-secret-" + uuid.uuid4().hex)
     os.environ["POOL_MAX"] = "4"
+    os.environ.pop("OPENAI_API_KEY", None)             # never call OpenAI from tests (DEC-003 OQ-31)
     from landlens.main import create_app
-    return create_app()
+    from landlens.rag.llm import FakeLLM
+    a = create_app()
+    a.state.llm = FakeLLM()                            # stubbed OpenAI; tests set .answer / .fail
+    return a
 
 
 @pytest.fixture(scope="session")
@@ -75,6 +88,9 @@ def _isolate(request):
     if "client" in request.fixturenames:
         c = request.getfixturevalue("client")
         c.app.state.auth_limiter.reset()
+        c.app.state.chat_limiter.reset()
+        c.app.state.llm.answer, c.app.state.llm.fail = None, None
+        c.app.state.llm.calls.clear()
         c.cookies.clear()
     yield
 
@@ -95,3 +111,16 @@ def make_user(client):
         client.cookies.clear()
         return session_headers(r), r.json()
     return _make
+
+
+def make_pdf(path, pages: list[str]) -> None:
+    """A small text PDF; an empty string makes a page with no text layer."""
+    import pymupdf
+    doc = pymupdf.open()
+    for text in pages:
+        page = doc.new_page()
+        if text:
+            page.insert_textbox(pymupdf.Rect(56, 56, 540, 800), text, fontsize=10)
+    doc.set_metadata({"title": "Generated test document"})
+    doc.save(path)
+    doc.close()

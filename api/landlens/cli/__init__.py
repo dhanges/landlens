@@ -22,7 +22,12 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("partitions", help="create next year's sale_transaction partition")
     sub.add_parser("verify", help="M1 verification: row counts, spatial consistency, invalid geometry, point query")
     sub.add_parser("checksum", help="per-table content checksums (determinism)")
-    sub.add_parser("ingest-pdf", help="ingest the corpus PDFs (M5, not implemented yet)")
+    p = sub.add_parser("ingest-pdf", help="parse, chunk, embed and insert the corpus PDFs (spec 2.13), idempotent by sha256")
+    p.add_argument("paths", nargs="*", help="PDF files or folders (default: seed_inputs/docs)")
+    p.add_argument("--dry-run", action="store_true", help="parse and chunk only; print pages, chunks, tokens, cost")
+    p.add_argument("--offline", action="store_true", help="only documents with an embeddings dump (no OpenAI call)")
+    p.add_argument("--fake-embeddings", action="store_true", help="local hash vectors, for pipeline tests only")
+    p.add_argument("--dump-dir", help="embeddings dump folder (default: seed_inputs/docs/embeddings)")
     p = sub.add_parser("bench", help="run the Q1-Q9 benchmarks (spec 2.19); writes bench/results/sf<N>.csv")
     p.add_argument("queries", nargs="*", help="optional subset, e.g. Q1 Q6")
     a = ap.parse_args(argv)
@@ -41,8 +46,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if a.cmd == "seed":
         from landlens.gen import run
+
+        from . import ingest
+        # documents are truncated with the other data tables; restore them from the embeddings dumps (free)
         for step in (lambda: migrate.run("schema"), lambda: run(a.sf, a.seed), lambda: migrate.run("post-load"),
-                     maintenance.refresh, maintenance.verify):
+                     maintenance.refresh, maintenance.verify, lambda: ingest.run([], offline=True) and 0):
             rc = step()
             if rc:
                 return rc
@@ -52,6 +60,9 @@ def main(argv: list[str] | None = None) -> int:
         import runpy
         bench = os.environ.get("LANDLENS_BENCH_DIR", "/app/bench")
         return runpy.run_path(f"{bench}/runner.py", run_name="landlens_bench")["main"](a.queries)
+    if a.cmd == "ingest-pdf":
+        from . import ingest
+        return ingest.run(a.paths, dry_run=a.dry_run, offline=a.offline, fake=a.fake_embeddings, dump_dir=a.dump_dir)
     if a.cmd in ("refresh", "partitions", "verify", "checksum"):
         return getattr(maintenance, a.cmd)()
     print(f"landlens {a.cmd}: not implemented yet", file=sys.stderr)

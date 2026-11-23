@@ -76,6 +76,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      LLM_MODEL: ${LLM_MODEL:-}
+      CHAT_MAX_DISTANCE: ${CHAT_MAX_DISTANCE:-}
       # `landlens migrate` sets the 013 role passwords from these (no secret in any migration file)
       LANDLENS_API_PASSWORD: ${LANDLENS_API_PASSWORD}
       LANDLENS_TILES_PASSWORD: ${LANDLENS_TILES_PASSWORD}
@@ -108,8 +110,12 @@ services:
       DATABASE_URL: postgresql://landlens_owner:${POSTGRES_PASSWORD}@db:5432/landlens_owner
       AS_OF_DATE: ${AS_OF_DATE:-}
       HOME: /tmp
+      # M5 jobs run here too (make ingest / make eval): the owner's key, paid steps only on their command
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
     volumes:
       - ./bench:/app/bench
+      - ./seed_inputs:/app/seed_inputs   # writable: ingest-pdf writes the embeddings dump (DEC-006)
     depends_on:
       db:
         condition: service_healthy

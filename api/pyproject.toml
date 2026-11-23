@@ -18,8 +18,11 @@ dependencies = [
     "argon2-cffi==25.1.0",
     "psycopg-pool==3.3.3",
     "pyjwt==2.15.1",
+    "pymupdf==2.1",
+    "httpx==0.28.1",
 ]
 # Checked against OSV on 2026-11-22 (M3): psycopg-pool, pyjwt, pytest, httpx have no known vulnerabilities.
+# 2026-11-23 (M5): pymupdf 2.1 (PDF parsing, spec 2.13) and httpx 0.28.1 at runtime (OpenAI REST calls) clean.
 
 [project.optional-dependencies]
 test = ["pytest==9.2.0", "httpx==0.28.1"]
