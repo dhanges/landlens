@@ -17,8 +17,9 @@ from landlens import __version__
 from landlens.app import config, errors
 from landlens.app.db import make_pool
 from landlens.app.ratelimit import SlidingWindow
-from landlens.app.routers import auth, credits, health, parcels, reports, screener, search, trends
+from landlens.app.routers import auth, chat, credits, health, parcels, reports, screener, search, trends
 from landlens.app.timing import TimingMiddleware
+from landlens.rag.llm import OpenAIAsync
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"),
                     format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -33,9 +34,15 @@ async def lifespan(app: FastAPI):
     app.state.cache = {}
     app.state.pool = make_pool(s)
     await app.state.pool.open(wait=False)
+    own_llm = getattr(app.state, "llm", None) is None       # tests inject a FakeLLM before startup
+    if own_llm:
+        app.state.llm = OpenAIAsync()
     try:
         yield
     finally:
+        if own_llm:
+            await app.state.llm.aclose()
+            app.state.llm = None
         await app.state.pool.close()
 
 
@@ -44,7 +51,7 @@ def create_app() -> FastAPI:
                   openapi_url="/api/openapi.json", redoc_url=None, lifespan=lifespan)
     errors.install(app)
     app.add_middleware(TimingMiddleware)
-    for r in (health, auth, search, parcels, reports, credits, screener, trends):
+    for r in (health, auth, search, parcels, reports, credits, screener, trends, chat):
         app.include_router(r.router, prefix="/api")
     return app
 

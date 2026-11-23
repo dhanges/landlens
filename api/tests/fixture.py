@@ -89,6 +89,7 @@ def statements() -> list[str]:
         "INSERT INTO document (document_id, title, doc_type, issued_by, issued_on, file_path, sha256, page_count)"
         " OVERRIDING SYSTEM VALUE VALUES (1, 'G.O.Ms.No.202', 'government_order', 'MA&UD', '2024-11-01',"
         " 'seed_inputs/docs/go202.pdf', repeat('a', 64), 40)",
+        "SELECT setval(pg_get_serial_sequence('document', 'document_id'), 1)",   # next generated id is 2
         "INSERT INTO master_plan VALUES (1, 'Test Master Plan 2041', 'KUDA', 2041, NULL, NULL)",
         "INSERT INTO zone_type VALUES ('R', 'Residential', 'Dwellings', NULL, NULL),"
         " ('C', 'Commercial', 'Shops and offices', 1, 12), ('A', 'Agricultural', 'Farming', NULL, NULL)",

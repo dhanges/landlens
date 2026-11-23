@@ -36,6 +36,8 @@ class Settings:
     rate_auth_per_min: int      # spec 2.10: 10 per minute on auth routes
     rate_chat_per_min: int      # spec 2.10: 20 per minute on chat (M5)
     rate_window_s: int
+    chat_max_distance: float    # spec 2.13 not-found rule: best cosine distance above this and no keyword hit
+    seed_inputs: str            # documents are served from here (file_path is relative to it)
 
 
 def _jwt_secret() -> str:
@@ -64,4 +66,6 @@ def load() -> Settings:
         rate_auth_per_min=_int("RATE_LIMIT_AUTH", 10),
         rate_chat_per_min=_int("RATE_LIMIT_CHAT", 20),
         rate_window_s=_int("RATE_LIMIT_WINDOW_S", 60),
+        chat_max_distance=float(os.environ.get("CHAT_MAX_DISTANCE") or 0.6),
+        seed_inputs=os.environ.get("LANDLENS_SEED_INPUTS", "/app/seed_inputs"),
     )
