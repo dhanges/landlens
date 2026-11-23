@@ -122,13 +122,24 @@ def context(cur) -> dict:
     cur.execute("SELECT count(*) FROM document_chunk")
     c["chunks"] = cur.fetchone()[0]
     if c["chunks"]:
-        cur.execute("SELECT embedding::text, left(content, 60) FROM document_chunk ORDER BY document_id, chunk_no LIMIT 1")
-        c["q_vec"], c["q_text"] = cur.fetchone()
+        # Q8 rotates through 20 (text, vector) pairs, one per timed run: texts are the eval set's answerable questions
+        # (bench/rag_eval_questions.json), vectors are stored chunk embeddings sampled by a fixed hash order, so
+        # Q8 needs no OpenAI call. Retrieval quality per method (recall@10 against expected pages) comes from
+        # the paid eval run (bench/rag_eval.py), which embeds the questions themselves.
+        cur.execute("SELECT embedding::text FROM document_chunk ORDER BY md5(document_id || '-' || chunk_no) LIMIT 20")
+        vecs = [r[0] for r in cur.fetchall()]
+        qf = HERE / "rag_eval_questions.json"
+        texts = [q["question"] for q in json.loads(qf.read_text())["questions"] if q["answerable"]] if qf.exists() else []
+        if not texts:
+            cur.execute("SELECT left(content, 60) FROM document_chunk ORDER BY document_id, chunk_no LIMIT 20")
+            texts = [r[0] for r in cur.fetchall()]
+        c["q_rot"] = [{"q_text": texts[i % len(texts)], "q_vec": v} for i, v in enumerate(vecs)]
+        c["q_vec"], c["q_text"] = c["q_rot"][0]["q_vec"], c["q_rot"][0]["q_text"]
     return c
 
 
-def explain(cur, sql_text: str, params: dict) -> dict:
-    cur.execute(f"EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) {bind(sql_text)}", params)
+def explain(cur, sql_text: str, params: dict, raw: bool = False) -> dict:
+    cur.execute(f"EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) {sql_text if raw else bind(sql_text)}", params)
     doc = cur.fetchone()[0]
     return (json.loads(doc) if isinstance(doc, str) else doc)[0]
 
@@ -145,8 +156,10 @@ def run_variant(conn, qid: str, v: dict, params: dict, sf: int) -> dict:
         warmups, runs = WARMUPS, RUNS
         i = 0
         while i < warmups + runs:
+            rot = params.get("q_rot") if qid == "Q8" else None
+            p = {**params, **rot[i % len(rot)]} if rot else params
             try:
-                last = explain(cur, v["sql"], params)
+                last = explain(cur, v["sql"], p, v.get("raw", False))
             except psycopg.errors.QueryCanceled:
                 row.update(note=f"timed out after {TIMEOUT_S} s" + (f"; {'; '.join(v['setup'])}" if v["setup"] else ""))
                 return row
@@ -174,14 +187,21 @@ def run_variant(conn, qid: str, v: dict, params: dict, sf: int) -> dict:
 
 
 def recall_at_10(conn, params: dict) -> float | None:
+    """HNSW recall@10 against the exact scan, averaged over the Q8 query vectors (hnsw.ef_search default 40)."""
+    rot = params.get("q_rot") or [{"q_vec": params["q_vec"]}]
+    q = bind("SELECT document_id, chunk_no FROM document_chunk ORDER BY embedding <=> :q_vec LIMIT 10")
     with conn.transaction(force_rollback=True), psycopg.ClientCursor(conn) as cur:
-        q = bind("SELECT document_id, chunk_no FROM document_chunk ORDER BY embedding <=> :q_vec LIMIT 10")
-        cur.execute(q, params)
-        hnsw = set(cur.fetchall())
+        cur.execute("SET LOCAL enable_seqscan = off")            # make the small table use the index
+        hnsw = []
+        for r in rot:
+            cur.execute(q, {**params, **r})
+            hnsw.append(set(cur.fetchall()))
         cur.execute("DROP INDEX chunk_emb_hnsw")
-        cur.execute(q, params)
-        exact = set(cur.fetchall())
-    return len(hnsw & exact) / max(len(exact), 1)
+        exact = []
+        for r in rot:
+            cur.execute(q, {**params, **r})
+            exact.append(set(cur.fetchall()))
+    return round(statistics.mean(len(h & e) / max(len(e), 1) for h, e in zip(hnsw, exact, strict=True)), 3)
 
 
 def main(argv: list[str]) -> int:
@@ -206,6 +226,13 @@ def main(argv: list[str]) -> int:
                 print(f"{qid} skipped: {spec['requires']} is empty (run landlens ingest-pdf first; Q8 runs in M6)")
                 rows.append({"scale_factor": sf, "query": qid, "variant": "-", "note": f"skipped: {spec['requires']} empty"})
                 continue
+            if qid == "Q8":       # the API's own statement (services/rag.py), timed as /chat runs it
+                from landlens.app.services.rag import CANDIDATES, RETRIEVE, RRF_K
+                params.update(any_term=False, cand=CANDIDATES, rrf=RRF_K, k=10)
+                for r in params.get("q_rot", []):
+                    r.update(q=r["q_text"], emb=r["q_vec"])
+                spec["variants"].append({"name": "hybrid_api_statement", "setup": [], "size": [], "raw": True,
+                                         "sql": RETRIEVE})
             for v in spec["variants"]:
                 if qid == "Q6" and "keyset" in v["name"] and params["scr_last_id"] is None:
                     rows.append({"scale_factor": sf, "query": qid, "variant": v["name"], "note": "skipped: fewer than 50 pages"})

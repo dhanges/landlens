@@ -9,6 +9,7 @@ WHERE tsv @@ q ORDER BY ts_rank_cd(tsv, q) DESC LIMIT 10;
 -- setup: DROP INDEX chunk_emb_hnsw
 SELECT document_id, chunk_no FROM document_chunk ORDER BY embedding <=> :q_vec LIMIT 10;
 -- variant: vector_hnsw
+-- setup: SET LOCAL enable_seqscan = off
 -- size: chunk_emb_hnsw
 SELECT document_id, chunk_no FROM document_chunk ORDER BY embedding <=> :q_vec LIMIT 10;
 -- variant: hybrid_rrf
