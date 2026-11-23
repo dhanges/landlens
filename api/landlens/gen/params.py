@@ -47,12 +47,14 @@ PRICE_BASE_YEAR = 2025            # B is the price level in this year (published
 LAMBDA_PER_KM = 0.03
 GROWTH = {"urban_plot": 0.07, "peri_urban": 0.09, "agricultural": 0.06}  # yearly, from 2010 [assumption]
 GROWTH_SHOCK_SD = 0.02
-PROJECT_EFFECT = {                 # alpha_j, tau_j (km) [assumption]
-    "Mamnoor airport": (0.25, 5.0),
-    "Inner Ring Road": (0.10, 2.0),
-    "Outer Ring Road": (0.15, 3.0),
-    "Kakatiya Mega Textile Park": (0.20, 4.0),
-    "NH-163 corridor": (0.12, 2.5),
+VILLAGE_GROWTH_SD = 0.035          # per-village offset to the yearly growth rate, so 5-year growth varies by village
+VILLAGE_GROWTH_CLIP = 0.08         # |offset| cap [assumption]
+PROJECT_EFFECT = {                 # alpha_j, tau_j (km): uplift alpha at the project, decaying as e^(-d/tau) [assumption]
+    "Mamnoor airport": (0.35, 4.0),
+    "Inner Ring Road": (0.10, 1.5),
+    "Outer Ring Road": (0.15, 2.0),
+    "Kakatiya Mega Textile Park": (0.25, 3.0),
+    "NH-163 corridor": (0.12, 2.0),
 }
 S_ANNOUNCED, S_SANCTIONED = 0.4, 1.0   # spec 2.12 step 8
 BETA_PER_M = 0.004

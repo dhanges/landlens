@@ -1,0 +1,9 @@
+filters,approx_total
+"{""land_type"":""peri_urban""}",33295
+"{""land_type"":""peri_urban"",""min_cagr_5y"":0.10}",20999
+"{""land_type"":""peri_urban"",""min_cagr_5y"":0.15}",8962
+"{""land_type"":""peri_urban"",""max_active_project_m"":3000}",9088
+"{""land_type"":""peri_urban"",""max_active_project_m"":3000,""min_cagr_5y"":0.10}",9035
+"{""land_type"":""peri_urban"",""max_active_project_m"":3000,""min_cagr_5y"":0.15}",4951
+"{""land_type"":""peri_urban"",""max_active_project_m"":3000,""min_cagr_5y"":0.15,""max_price_vs_median_pct"":0}",3798
+"{""land_type"":""urban_plot"",""max_active_project_m"":1000,""min_cagr_5y"":0.10}",11427

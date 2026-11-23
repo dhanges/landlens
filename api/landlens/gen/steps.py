@@ -283,12 +283,17 @@ def _growth_index(rng) -> dict:
 
 
 def price_model(w: World, rng):
-    """Return f(x, y, land_type_idx, frontage, year) -> noise-free price per sq m (vectorised over parcels)."""
+    """Return f(x, y, land_type_idx, frontage, year, village_id) -> noise-free price per sq m (vectorised).
+
+    Village growth: each village gets an offset g_v to the yearly growth rate (VILLAGE_GROWTH_SD), applied as
+    (1 + g_v)^(year - PRICE_BASE_YEAR) so B stays the base-year level; 5-year growth then spreads by village."""
     G = _growth_index(rng)
+    n_v = max(v["village_id"] for v in w.villages) + 1
+    gv = np.clip(rng.normal(0, params.VILLAGE_GROWTH_SD, n_v), -params.VILLAGE_GROWTH_CLIP, params.VILLAGE_GROWTH_CLIP)
     cxy = np.array([[c.x, c.y] for c in w.layers.centres.values()])
     eff = [(p, *params.PROJECT_EFFECT.get(base_name(p), (0.0, 1.0))) for p in w.projects]
 
-    def f(x, y, lt, frontage, year):
+    def f(x, y, lt, frontage, year, vid):
         d = np.sqrt(((np.stack([x, y], 1)[:, None, :] - cxy[None]) ** 2).sum(-1)).min(1) / 1000.0
         base = np.array([params.B_INR_PER_SQM[t] for t in LAND_TYPES])[lt]
         g = np.array([G[t][year] for t in LAND_TYPES])[lt]
@@ -298,7 +303,8 @@ def price_model(w: World, rng):
             if s and a:
                 dij = shapely.distance(shapely.points(x, y), p.geom) / 1000.0
                 proj *= 1 + a * s * np.exp(-dij / tau)
-        return base * np.exp(-params.LAMBDA_PER_KM * d) * g * proj * (1 + params.BETA_PER_M * frontage)
+        village = (1 + gv[np.asarray(vid, dtype=int)]) ** (year - params.PRICE_BASE_YEAR)
+        return base * np.exp(-params.LAMBDA_PER_KM * d) * g * village * proj * (1 + params.BETA_PER_M * frontage)
 
     return f
 
@@ -320,7 +326,8 @@ def sales(w: World, rng, price) -> None:
         start = date(yr, 1, 1)
         end = min(date(yr, 12, 31), params.SALE_CUTOFF)
         days = rng.integers(0, (end - start).days + 1, len(idx))
-        base = price(P["px"][idx].astype(float), P["py"][idx].astype(float), lt[idx], P["frontage"][idx], yr)
+        base = price(P["px"][idx].astype(float), P["py"][idx].astype(float), lt[idx], P["frontage"][idx], yr,
+                     P["village_id"][idx])
         ppsqm = base * rng.lognormal(0, params.EPS_SD, len(idx))
         partial = rng.uniform(0, 1, len(idx)) < params.PARTIAL_SHARE
         frac = np.where(partial, rng.uniform(*params.PARTIAL_FRACTION, len(idx)), 1.0)
@@ -356,7 +363,8 @@ def guideline_rates(w: World, rng, price) -> None:
                 if lag.sum() >= 3:
                     lagged = float(np.median(S["price_sqm"][lag]))
                 else:   # no local sales yet (2010, or outside the parcel window): model price at the village point
-                    lagged = float(price(np.array([c.x]), np.array([c.y]), np.array([ti]), np.array([0.0]), max(gy - 1, 2010))[0])
+                    lagged = float(price(np.array([c.x]), np.array([c.y]), np.array([ti]), np.array([0.0]), max(gy - 1, 2010),
+                                         np.array([v["village_id"]]))[0])
                 share = rng.uniform(*params.GUIDELINE_SHARE)
                 w.guideline.append((v["village_id"], t, date(gy, 4, 1), round(lagged * share, 2)))
 

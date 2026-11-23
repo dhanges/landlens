@@ -86,6 +86,7 @@ function colours() {
     heat1: c("heat-1"),
     heat2: c("heat-2"),
     heat3: c("heat-3"),
+    dark: document.documentElement.getAttribute("data-theme") === "dark",
   };
 }
 
@@ -402,7 +403,8 @@ function overlayLayers(k: ReturnType<typeof colours>, visible: Record<Overlay, b
       "source-layer": "villages",
       maxzoom: PARCEL_MIN_ZOOM,
       layout: vis("parcels"),
-      paint: { "fill-color": heat(k.border), "fill-opacity": 0.75 },
+      // dark heat tokens sit close to the dark land colour, so dark mode paints them opaque
+      paint: { "fill-color": heat(k.border), "fill-opacity": k.dark ? 1 : 0.75 },
     },
     {
       id: "ll-villages-line",
@@ -411,7 +413,11 @@ function overlayLayers(k: ReturnType<typeof colours>, visible: Record<Overlay, b
       "source-layer": "villages",
       maxzoom: PARCEL_MIN_ZOOM,
       layout: vis("parcels"),
-      paint: { "line-color": k.surface, "line-width": 1.5 },
+      paint: {
+        "line-color": k.dark ? k.label : k.surface,
+        "line-opacity": k.dark ? 0.35 : 1,
+        "line-width": k.dark ? 1 : 1.5,
+      },
     },
     {
       id: "ll-parcels-fill",

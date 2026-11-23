@@ -61,6 +61,9 @@ def load(conn, centres: dict) -> tuple[list[Project], str]:
 
 
 def fallback(conn, centres: dict) -> list[Project]:
+    """Status mix [assumption, owner request 2026-11-23]: the corridor roads that shape the demo window are not all
+    "active". ORR and NH-163 are completed, the Inner Ring Road is only proposed; active (sanctioned or under
+    construction, spec 2.4 mv_parcel_metrics) are the airport and the textile park."""
     core = shapely.centroid(shapely.MultiPoint(list(centres.values())))
     airport = to_utm(conn, [Point(79.6022, 17.9136)])[0]          # approximate Mamnoor site [assumption]
     a = np.radians(245)                                            # towards Hyderabad [assumption]
@@ -73,17 +76,17 @@ def fallback(conn, centres: dict) -> list[Project]:
                 date(2028, 12, 31), syn,
                 [(date(2015, 6, 1), "proposed", syn), (date(2024, 12, 1), "sanctioned", syn)]),
         Project(f"{FALLBACK} Inner Ring Road", "ring_road", core.buffer(5000, quad_segs=32).exterior, date(2026, 12, 31), syn,
-                [(date(2014, 1, 1), "proposed", syn), (date(2021, 6, 1), "sanctioned", syn),
-                 (date(2023, 3, 1), "under_construction", syn)]),
+                [(date(2014, 1, 1), "proposed", syn)]),                     # still only proposed
         Project(f"{FALLBACK} Outer Ring Road", "ring_road", core.buffer(12000, quad_segs=48).exterior, date(2030, 12, 31), syn,
-                [(date(2016, 1, 1), "proposed", syn), (date(2023, 1, 1), "sanctioned", syn)]),
+                [(date(2016, 1, 1), "proposed", syn), (date(2018, 3, 1), "sanctioned", syn),
+                 (date(2019, 6, 1), "under_construction", syn), (date(2024, 3, 1), "completed", syn)]),
         Project(f"{FALLBACK} Kakatiya Mega Textile Park", "industrial_park", textile.buffer(1500, quad_segs=8),
                 date(2027, 12, 31), syn,
                 [(date(2016, 10, 1), "proposed", syn), (date(2017, 10, 1), "sanctioned", syn),
                  (date(2018, 6, 1), "under_construction", syn)]),
         Project(f"{FALLBACK} NH-163 corridor", "highway", LineString([core, nh_end]), date(2026, 6, 30), syn,
                 [(date(2012, 1, 1), "proposed", syn), (date(2016, 3, 1), "sanctioned", syn),
-                 (date(2018, 1, 1), "under_construction", syn)]),
+                 (date(2018, 1, 1), "under_construction", syn), (date(2023, 6, 1), "completed", syn)]),
     ]
 
 

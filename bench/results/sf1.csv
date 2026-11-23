@@ -1,28 +1,28 @@
 scale_factor,query,variant,median_ms,p95_ms,runs,plan_nodes,indexes_used,shared_hit,shared_read,index_size_mb,rows,note
-1,Q1,seq_scan,348.662,432.431,10,Gather|Seq Scan,,3086,0,,1,DROP INDEX parcel_geom_gix
-1,Q1,gist,0.131,0.181,10,Index Scan,parcel_geom_gix,6,0,3.95,1,
-1,Q2,no_index,9322.627,10023.352,10,Aggregate|Hash|Hash Join|Materialize|Nested Loop|Seq Scan|Sort,,3093,0,,1,DROP INDEX parcel_geom_gix; DROP INDEX project_geom_gix; DROP INDEX project_status_active_ix
-1,Q2,gist,6495.793,7278.561,10,Aggregate|Hash|Hash Join|Index Scan|Nested Loop|Seq Scan|Sort,parcel_geom_gix,218838,0,3.95,1,DROP INDEX project_status_active_ix
-1,Q2,gist_partial,6294.844,6675.166,10,Aggregate|Hash|Hash Join|Index Scan|Nested Loop|Seq Scan|Sort,parcel_geom_gix,218838,0,3.96,1,
-1,Q2,gist_subdivided,1446.023,1671.638,10,Aggregate|Hash|Hash Join|Index Scan|Nested Loop|Seq Scan|Sort,parcel_geom_gix,414398,0,3.97,1,"CREATE TABLE bench_project_piece AS SELECT project_id, ST_Subdivide(ST_Segmentize(geom, 250), 16) AS geom FROM dev_project; CREATE INDEX bench_project_piece_gix ON bench_project_piece USING gist (geom)"
-1,Q2,impact_lookup,210.696,289.482,10,Aggregate|Hash|Hash Join|Index Scan|Nested Loop|Seq Scan|Sort,impact_project_ix,135472,0,10.96,1,
-1,Q3,order_by_st_distance,363.911,461.343,10,Bitmap Heap Scan|Bitmap Index Scan|Gather|Index Scan|Limit|Merge Append|Nested Loop|Sort,parcel_centroid_gix|sale_transaction_2023_parcel_id_registered_on_idx|sale_transaction_2024_parcel_id_registered_on_idx|sale_transaction_2025_parcel_id_registered_on_idx|sale_transaction_2026_parcel_id_registered_on_idx|sale_transaction_2027_parcel_id_registered_on_idx|sale_transaction_default_parcel_id_registered_on_idx,362797,0,,10,
-1,Q3,knn,153.772,174.937,10,Bitmap Heap Scan|Bitmap Index Scan|Gather Merge|Index Scan|Limit|Merge Append|Nested Loop|Sort,parcel_centroid_gix|sale_transaction_2023_parcel_id_registered_on_idx|sale_transaction_2024_parcel_id_registered_on_idx|sale_transaction_2025_parcel_id_registered_on_idx|sale_transaction_2026_parcel_id_registered_on_idx|sale_transaction_2027_parcel_id_registered_on_idx|sale_transaction_default_parcel_id_registered_on_idx,1920,0,3.93,10,
-1,Q4,no_index,91.773,124.786,10,Append|Gather|Seq Scan|Sort,,3902,0,,13,DROP INDEX sale_parcel_date_ix
-1,Q4,composite_btree,0.215,0.358,10,Append|Index Scan|Seq Scan|Sort,sale_transaction_2010_parcel_id_registered_on_idx|sale_transaction_2011_parcel_id_registered_on_idx|sale_transaction_2012_parcel_id_registered_on_idx|sale_transaction_2013_parcel_id_registered_on_idx|sale_transaction_2014_parcel_id_registered_on_idx|sale_transaction_2015_parcel_id_registered_on_idx|sale_transaction_2016_parcel_id_registered_on_idx|sale_transaction_2017_parcel_id_registered_on_idx|sale_transaction_2018_parcel_id_registered_on_idx|sale_transaction_2019_parcel_id_registered_on_idx|sale_transaction_2020_parcel_id_registered_on_idx|sale_transaction_2021_parcel_id_registered_on_idx|sale_transaction_2022_parcel_id_registered_on_idx|sale_transaction_2023_parcel_id_registered_on_idx|sale_transaction_2024_parcel_id_registered_on_idx|sale_transaction_2025_parcel_id_registered_on_idx|sale_transaction_2026_parcel_id_registered_on_idx,47,0,10.61,13,
-1,Q5,raw_aggregation,149.952,182.706,10,Aggregate|Append|Hash|Hash Join|Index Scan|Seq Scan|Sort|WindowAgg,parcel_village_id_survey_no_sub_div_key,6325,0,,17,
-1,Q5,materialized_view,0.015,0.022,10,Index Scan,mv_village_price_index_village_id_land_type_yr_idx,4,0,,17,
-1,Q5,refresh_concurrently,711.4,711.4,1,,,,,,,REFRESH MATERIALIZED VIEW CONCURRENTLY mv_village_price_index
-1,Q6,base_joins_page1,1320.26,1534.725,10,Aggregate|Append|CTE Scan|Hash|Hash Join|Index Scan|Limit|Materialize|Merge Join|Nested Loop|Result|Seq Scan|Sort|Subquery Scan|Unique,parcel_village_id_survey_no_sub_div_key|parcel_zone_pkey|plan_zone_pkey,134545,0,,50,
-1,Q6,mv_no_covering_page1,65.069,70.371,10,Gather Merge|Limit|Seq Scan|Sort,,2092,0,,50,DROP INDEX pm_screener_ix
-1,Q6,mv_covering_page1,11.066,13.535,10,Index Scan|Limit|Sort,pm_screener_ix,429,0,6.44,50,
-1,Q6,mv_covering_page50_offset,23.847,31.731,10,Index Scan|Limit|Sort,pm_screener_ix,429,0,,50,
-1,Q6,mv_covering_page50_keyset,8.107,9.324,10,Index Scan|Limit|Sort,pm_screener_ix,335,0,,50,
-1,Q6,mv_no_covering_selective_page1,67.54,84.26,10,Gather Merge|Limit|Seq Scan|Sort,,2092,0,,50,DROP INDEX pm_screener_ix
-1,Q6,mv_covering_selective_page1,1.058,1.251,10,Index Scan|Limit|Sort,pm_screener_ix,41,0,6.44,50,
-1,Q7,no_index,2.732,3.555,10,Aggregate|Seq Scan,,229,0,,1,DROP INDEX sale_date_brin; SET LOCAL enable_indexscan = off; SET LOCAL enable_indexonlyscan = off; SET LOCAL enable_bitmapscan = off
-1,Q7,btree,2.058,2.497,10,Aggregate|Index Scan,sale_transaction_2024_registered_on_idx,63,0,2.66,1,DROP INDEX sale_date_brin; CREATE INDEX bench_sale_date_btree ON sale_transaction (registered_on)
-1,Q7,brin,2.75,3.262,10,Aggregate|Bitmap Heap Scan|Bitmap Index Scan,sale_transaction_2024_registered_on_idx,130,0,0.45,1,
+1,Q1,seq_scan,391.782,435.56,10,Gather|Seq Scan,,3086,0,,1,DROP INDEX parcel_geom_gix
+1,Q1,gist,0.111,0.14,10,Index Scan,parcel_geom_gix,5,0,4.8,1,
+1,Q2,no_index,3311.065,3966.721,10,Aggregate|Hash|Hash Join|Materialize|Nested Loop|Seq Scan|Sort,,3094,0,,1,DROP INDEX parcel_geom_gix; DROP INDEX project_geom_gix; DROP INDEX project_status_active_ix
+1,Q2,gist,735.294,1044.053,10,Aggregate|Hash|Hash Join|Index Scan|Nested Loop|Seq Scan|Sort,parcel_geom_gix,10091,0,4.8,1,DROP INDEX project_status_active_ix
+1,Q2,gist_partial,934.128,1029.018,10,Aggregate|Hash|Hash Join|Index Scan|Nested Loop|Seq Scan|Sort,parcel_geom_gix,10091,0,4.81,1,
+1,Q2,gist_subdivided,561.197,697.526,10,Aggregate|Hash|Hash Join|Index Scan|Nested Loop|Seq Scan|Sort,parcel_geom_gix,40012,0,4.82,1,"CREATE TABLE bench_project_piece AS SELECT project_id, ST_Subdivide(ST_Segmentize(geom, 250), 16) AS geom FROM dev_project; CREATE INDEX bench_project_piece_gix ON bench_project_piece USING gist (geom)"
+1,Q2,impact_lookup,47.23,52.703,10,Aggregate|Hash|Hash Join|Index Scan|Nested Loop|Seq Scan|Sort,impact_project_ix,26064,0,14.22,1,
+1,Q3,order_by_st_distance,432.013,747.667,10,Bitmap Heap Scan|Bitmap Index Scan|Gather|Index Scan|Limit|Merge Append|Nested Loop|Sort,parcel_centroid_gix|sale_transaction_2023_parcel_id_registered_on_idx|sale_transaction_2024_parcel_id_registered_on_idx|sale_transaction_2025_parcel_id_registered_on_idx|sale_transaction_2026_parcel_id_registered_on_idx|sale_transaction_2027_parcel_id_registered_on_idx|sale_transaction_default_parcel_id_registered_on_idx,362919,0,,10,
+1,Q3,knn,186.123,217.494,10,Bitmap Heap Scan|Bitmap Index Scan|Gather Merge|Index Scan|Limit|Merge Append|Nested Loop|Sort,parcel_centroid_gix|sale_transaction_2023_parcel_id_registered_on_idx|sale_transaction_2024_parcel_id_registered_on_idx|sale_transaction_2025_parcel_id_registered_on_idx|sale_transaction_2026_parcel_id_registered_on_idx|sale_transaction_2027_parcel_id_registered_on_idx|sale_transaction_default_parcel_id_registered_on_idx,1976,0,4.75,10,
+1,Q4,no_index,67.169,73.787,10,Append|Gather|Seq Scan|Sort,,3902,0,,13,DROP INDEX sale_parcel_date_ix
+1,Q4,composite_btree,0.407,0.778,10,Append|Index Scan|Seq Scan|Sort,sale_transaction_2010_parcel_id_registered_on_idx|sale_transaction_2011_parcel_id_registered_on_idx|sale_transaction_2012_parcel_id_registered_on_idx|sale_transaction_2013_parcel_id_registered_on_idx|sale_transaction_2014_parcel_id_registered_on_idx|sale_transaction_2015_parcel_id_registered_on_idx|sale_transaction_2016_parcel_id_registered_on_idx|sale_transaction_2017_parcel_id_registered_on_idx|sale_transaction_2018_parcel_id_registered_on_idx|sale_transaction_2019_parcel_id_registered_on_idx|sale_transaction_2020_parcel_id_registered_on_idx|sale_transaction_2021_parcel_id_registered_on_idx|sale_transaction_2022_parcel_id_registered_on_idx|sale_transaction_2023_parcel_id_registered_on_idx|sale_transaction_2024_parcel_id_registered_on_idx|sale_transaction_2025_parcel_id_registered_on_idx|sale_transaction_2026_parcel_id_registered_on_idx,47,0,13.3,13,
+1,Q5,raw_aggregation,203.514,384.003,10,Aggregate|Append|Hash|Hash Join|Index Scan|Seq Scan|Sort|WindowAgg,parcel_village_id_survey_no_sub_div_key,6325,0,,17,
+1,Q5,materialized_view,0.066,0.747,10,Index Scan,mv_village_price_index_village_id_land_type_yr_idx,4,0,,17,
+1,Q5,refresh_concurrently,1606.6,1606.6,1,,,,,,,REFRESH MATERIALIZED VIEW CONCURRENTLY mv_village_price_index
+1,Q6,base_joins_page1,1393.237,1572.2,10,Aggregate|Append|CTE Scan|Hash|Hash Join|Index Scan|Limit|Materialize|Merge Join|Nested Loop|Result|Seq Scan|Sort|Subquery Scan|Unique,parcel_village_id_survey_no_sub_div_key|parcel_zone_pkey|plan_zone_pkey,246686,0,,50,
+1,Q6,mv_no_covering_page1,80.122,118.157,10,Gather Merge|Limit|Seq Scan|Sort,,4079,0,,50,DROP INDEX pm_screener_ix
+1,Q6,mv_covering_page1,15.34,17.5,10,Index Scan|Limit|Sort,pm_screener_ix,1230,0,27.16,50,
+1,Q6,mv_covering_page50_offset,17.825,25.371,10,Index Scan|Limit|Sort,pm_screener_ix,1230,0,,50,
+1,Q6,mv_covering_page50_keyset,13.201,18.196,10,Index Scan|Limit|Sort,pm_screener_ix,1059,0,,50,
+1,Q6,mv_no_covering_selective_page1,83.4,112.938,10,Gather Merge|Limit|Seq Scan|Sort,,4079,0,,50,DROP INDEX pm_screener_ix
+1,Q6,mv_covering_selective_page1,3.481,4.443,10,Index Scan|Limit|Sort,pm_screener_ix,221,0,27.16,50,
+1,Q7,no_index,6.003,7.939,10,Aggregate|Seq Scan,,227,0,,1,DROP INDEX sale_date_brin; SET LOCAL enable_indexscan = off; SET LOCAL enable_indexonlyscan = off; SET LOCAL enable_bitmapscan = off
+1,Q7,btree,2.303,2.977,10,Aggregate|Index Scan,sale_transaction_2024_registered_on_idx,62,0,2.66,1,DROP INDEX sale_date_brin; CREATE INDEX bench_sale_date_btree ON sale_transaction (registered_on)
+1,Q7,brin,8.271,8.815,10,Aggregate|Bitmap Heap Scan|Bitmap Index Scan,sale_transaction_2024_registered_on_idx,229,0,0.45,1,
 1,Q8,-,,,,,,,,,,skipped: document_chunk empty
-1,Q9,ilike,0.27,0.308,10,Limit|Seq Scan,,6,0,,1,DROP INDEX village_name_trgm
-1,Q9,trigram_gin,0.762,0.973,10,Limit|Seq Scan|Sort,,6,0,0.04,0,
+1,Q9,ilike,0.322,0.407,10,Limit|Seq Scan,,6,0,,1,DROP INDEX village_name_trgm
+1,Q9,trigram_gin,1.348,1.886,10,Limit|Seq Scan|Sort,,6,0,0.09,0,
