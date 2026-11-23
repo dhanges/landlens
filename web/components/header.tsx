@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { href: "/map", label: "Map" },
   { href: "/trends", label: "Trends" },
+  { href: "/chat", label: "Ask" },
   { href: "/pricing", label: "Pricing" },
 ];
 
@@ -27,7 +28,7 @@ export function Header({ wide = false, search = false, landing = false }: { wide
   const path = usePathname();
   const me = useMe();
   const user = me.data;
-  const nav = landing ? [NAV[0], { href: "/map#screener", label: "Screener" }, NAV[1], { href: "#pricing", label: "Pricing" }] : NAV;
+  const nav = landing ? [NAV[0], { href: "/map#screener", label: "Screener" }, NAV[1], NAV[2], { href: "#pricing", label: "Pricing" }] : NAV;
   const next = encodeURIComponent(path || "/");
 
   return (

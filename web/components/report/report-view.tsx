@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRef, useState } from "react";
 
+import { ChatPanel } from "@/components/chat/chat-panel";
 import { PriceHistory } from "@/components/report/price-history";
 import { ValuationSection } from "@/components/report/valuation";
 import { EmptyState, ErrorState } from "@/components/states";
@@ -444,23 +445,7 @@ function FullReport({ r }: { r: api.Report }) {
             Ask the master plan
           </h2>
           <p className="mb-3.5 text-[13px] text-muted">Answers come only from the government documents, with the page.</p>
-          <div className="mb-2.5 rounded-lg bg-bg px-3 py-2.5 text-[14px]">Can I build a warehouse on this parcel?</div>
-          <div className="mb-3.5 text-[14px]">
-            Answers will appear here with numbered citations, such as{" "}
-            <span className="num text-accent">[1] G.O.Ms.No.202, p. 12</span>, each opening the document at that page.
-            Document answers are not available yet: the master plan documents have not been loaded.
-          </div>
-          <label className="flex items-center gap-2 rounded-lg border border-border py-1.5 pl-3 pr-1.5 opacity-70">
-            <span className="sr-only-label">Question</span>
-            <input
-              disabled
-              placeholder="What setbacks apply to a residential plot?"
-              className="min-w-0 flex-1 border-0 bg-transparent text-[14px] text-text outline-none placeholder:text-muted"
-            />
-            <Button variant="primary" size="sm" disabled>
-              Ask
-            </Button>
-          </label>
+          <ChatPanel parcelId={r.parcel_id} compact placeholder="Can I build a warehouse on this parcel?" />
         </section>
 
         <section className="card p-5" aria-labelledby="loc-h">

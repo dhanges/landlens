@@ -404,3 +404,24 @@ export function newIdempotencyKey(): string {
   const h = Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
 }
+
+// ---- document Q&A (FR-8, spec 2.13) --------------------------------------------------------------------
+export interface ChatCitation {
+  n: number;
+  document_id: number;
+  title: string;
+  page_start: number;
+  page_end: number;
+  snippet: string;
+}
+export interface ChatResponse {
+  found: boolean;
+  degraded: boolean;
+  answer: string | null;
+  citations: ChatCitation[];
+  note: string | null;
+}
+export const chat = (question: string, parcelId?: number) =>
+  request<ChatResponse>("/chat", { method: "POST", body: { question, ...(parcelId ? { parcel_id: parcelId } : {}) } });
+/** The PDF opened at a page by the browser's viewer. */
+export const documentUrl = (id: number, page: number) => `${API_BASE_URL}/api/documents/${id}/file#page=${page}`;
