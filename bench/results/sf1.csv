@@ -23,6 +23,11 @@ scale_factor,query,variant,median_ms,p95_ms,runs,plan_nodes,indexes_used,shared_
 1,Q7,no_index,6.003,7.939,10,Aggregate|Seq Scan,,227,0,,1,DROP INDEX sale_date_brin; SET LOCAL enable_indexscan = off; SET LOCAL enable_indexonlyscan = off; SET LOCAL enable_bitmapscan = off
 1,Q7,btree,2.303,2.977,10,Aggregate|Index Scan,sale_transaction_2024_registered_on_idx,62,0,2.66,1,DROP INDEX sale_date_brin; CREATE INDEX bench_sale_date_btree ON sale_transaction (registered_on)
 1,Q7,brin,8.271,8.815,10,Aggregate|Bitmap Heap Scan|Bitmap Index Scan,sale_transaction_2024_registered_on_idx,229,0,0.45,1,
-1,Q8,-,,,,,,,,,,skipped: document_chunk empty
+1,Q8,keyword_gin,0.361,0.683,10,Limit|Seq Scan|Sort,,263,0,0.4,0,
+1,Q8,vector_exact,1.496,2.358,10,Limit|Seq Scan|Sort,,474,0,,10,DROP INDEX chunk_emb_hnsw
+1,Q8,vector_hnsw,0.687,0.94,10,Index Scan|Limit,chunk_emb_hnsw,210,0,1.17,10,SET LOCAL enable_seqscan = off
+1,Q8,hybrid_rrf,3.17,4.117,10,Hash|Hash Join|Limit|Seq Scan|Sort|Subquery Scan|WindowAgg,,763,0,,10,
+1,Q8,hybrid_api_statement,2.423,2.971,10,Aggregate|CTE Scan|Hash|Hash Join|Incremental Sort|Index Scan|Limit|Nested Loop|Seq Scan|Sort|WindowAgg,document_chunk_pkey,818,0,,10,
+1,Q8,hnsw_recall_at_10,,,,,,,,,,recall@10 = 1.0
 1,Q9,ilike,0.322,0.407,10,Limit|Seq Scan,,6,0,,1,DROP INDEX village_name_trgm
 1,Q9,trigram_gin,1.348,1.886,10,Limit|Seq Scan|Sort,,6,0,0.09,0,

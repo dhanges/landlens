@@ -1,0 +1,669 @@
+{
+  "summary": {
+    "questions": 25,
+    "model": "gpt-4o-mini",
+    "max_distance": 0.6,
+    "citation_correct_pct": 95.0,
+    "all_citations_correct_pct": 80.0,
+    "refusal_accuracy_pct": 100.0,
+    "recall_at_10_pct": {
+      "keyword": 30.0,
+      "vector": 100.0,
+      "hybrid": 100.0
+    },
+    "target_met": true,
+    "mean_seconds": 2.17
+  },
+  "results": [
+    {
+      "id": "A01",
+      "answerable": true,
+      "question": "Who can declare an area to be a development area under the Telangana Urban Areas (Development) Act?",
+      "found": true,
+      "degraded": false,
+      "answer": "The Government of Telangana can declare an area to be a development area under the Telangana Urban Areas (Development) Act by notification. This applies whether the area is classified as an urban area or otherwise, in the interest of specific development objectives conducive to the overall planned development of the State. Additionally, areas within the jurisdiction of a Special Area Development Authority are deemed to be development areas as notified under section 13 of the Act [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Telangana Urban Areas (Development) Act, 1975",
+          "page_start": 4,
+          "page_end": 4
+        }
+      ],
+      "seconds": 3.69,
+      "prompt_tokens_est": 2221,
+      "best_distance": 0.25218547640262157,
+      "keyword_hits": 3,
+      "key_facts": "The Government, by notification (section 13(1)).",
+      "correct": false,
+      "all_citations_correct": false,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A02",
+      "answerable": true,
+      "question": "What must a Master Plan for a development area define?",
+      "found": true,
+      "degraded": false,
+      "answer": "A Master Plan for a development area must define the various zones into which the area may be divided for development purposes, indicating how land in each zone is proposed to be used and the stages for carrying out such development. It should also serve as a basic framework within which zonal development plans can be prepared. Additionally, the Master Plan may provide for any other matters necessary for the proper development of the area [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Telangana Urban Areas (Development) Act, 1975",
+          "page_start": 6,
+          "page_end": 6
+        }
+      ],
+      "seconds": 2.57,
+      "prompt_tokens_est": 2230,
+      "best_distance": 0.29006135904727093,
+      "keyword_hits": 0,
+      "key_facts": "The zones of the development area, how land in each zone is to be used, and the stages of development; a framework for zonal development plans (section 6(2)).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A03",
+      "answerable": true,
+      "question": "If the development authority does not decide on my application for development permission, when is permission deemed to be granted?",
+      "found": true,
+      "degraded": false,
+      "answer": "If the development authority does not decide on your application for development permission within ninety days after receipt of the application, the permission is deemed to be granted. You may then proceed to carry out the development, provided it does not contravene any provisions of the Act or any rules or regulations made under it [2].",
+      "note": null,
+      "citations": [
+        {
+          "n": 2,
+          "title": "Telangana Urban Areas (Development) Act, 1975",
+          "page_start": 10,
+          "page_end": 11
+        }
+      ],
+      "seconds": 2.38,
+      "prompt_tokens_est": 2411,
+      "best_distance": 0.34726069901446155,
+      "keyword_hits": 0,
+      "key_facts": "If neither granted nor refused within ninety days of the application or of the further information, permission is deemed granted (section 14(5)).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A04",
+      "answerable": true,
+      "question": "What documents must accompany an application for development permission to the Authority?",
+      "found": true,
+      "degraded": false,
+      "answer": "An application for development permission to the Authority must be accompanied by a fee as prescribed, a copy of the title deed of the land duly attested by a Gazetted Officer of the Government, and either an urban land ceiling clearance certificate if the extent of the land exceeds the ceiling limit or an affidavit declaring that the total extent of land held by the applicant, their spouse, and unmarried minor children does not exceed the ceiling limit [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Telangana Urban Areas (Development) Act, 1975",
+          "page_start": 10,
+          "page_end": 10
+        }
+      ],
+      "seconds": 3.7,
+      "prompt_tokens_est": 2403,
+      "best_distance": 0.32552616434414783,
+      "keyword_hits": 0,
+      "key_facts": "The prescribed fee, a copy of the title deed attested by a Gazetted Officer, and an urban land ceiling clearance certificate or an affidavit that holdings are within the ceiling (section 14(2)).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A05",
+      "answerable": true,
+      "question": "Is the application fee refunded if development permission is refused?",
+      "found": true,
+      "degraded": false,
+      "answer": "The application fee is not refunded if development permission is refused. According to the law, \"where permission is refused under this section the applicant or any person claiming through him shall not be entitled to get refund of the fee paid on the application for permission\" [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Telangana Urban Areas (Development) Act, 1975",
+          "page_start": 10,
+          "page_end": 11
+        }
+      ],
+      "seconds": 2.24,
+      "prompt_tokens_est": 2399,
+      "best_distance": 0.43978193835211554,
+      "keyword_hits": 1,
+      "key_facts": "No; the applicant is not entitled to a refund (section 14(8)).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": true,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A06",
+      "answerable": true,
+      "question": "What is the penalty for developing land without the Authority's permission?",
+      "found": true,
+      "degraded": false,
+      "answer": "The penalty for developing land without the Authority's permission includes imprisonment for up to three years or a fine that may extend to twenty percent of the land's value as fixed by the Registration Department at the time of development. Additionally, for continuing offences, there may be a further fine of one percent of the land's value for each day the offence continues after conviction for the first offence [3][4].",
+      "note": null,
+      "citations": [
+        {
+          "n": 3,
+          "title": "Telangana Urban Areas (Development) Act, 1975",
+          "page_start": 22,
+          "page_end": 22
+        },
+        {
+          "n": 4,
+          "title": "Telangana Urban Areas (Development) Act, 1975",
+          "page_start": 23,
+          "page_end": 23
+        }
+      ],
+      "seconds": 2.24,
+      "prompt_tokens_est": 2392,
+      "best_distance": 0.3580768156538684,
+      "keyword_hits": 2,
+      "key_facts": "Imprisonment up to three years, or a fine up to 20% of the land value fixed by the Registration Department, or both; plus up to 1% of that value per day for a continuing offence (section 41(1)).",
+      "correct": true,
+      "all_citations_correct": false,
+      "recall10_keyword": true,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A07",
+      "answerable": true,
+      "question": "What is the maximum rate of development charges per square metre?",
+      "found": true,
+      "degraded": false,
+      "answer": "The maximum rate of development charges is rupees three hundred per square meter for the development of land and rupees one hundred and twenty-five per square meter for the development of buildings [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Telangana Urban Areas (Development) Act, 1975",
+          "page_start": 16,
+          "page_end": 16
+        }
+      ],
+      "seconds": 2.12,
+      "prompt_tokens_est": 2421,
+      "best_distance": 0.34589692038396824,
+      "keyword_hits": 0,
+      "key_facts": "Rs 300 per sq m for development of land and Rs 125 per sq m of floor area for buildings (section 28(2) proviso).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A08",
+      "answerable": true,
+      "question": "How much time does an owner get to remove an unauthorised development after a demolition order?",
+      "found": true,
+      "degraded": false,
+      "answer": "An owner is given a period of not less than five days and not more than fifteen days to remove an unauthorized development after a demolition order has been issued. This period starts from the date on which a copy of the order is delivered to the owner, along with a brief statement of the reasons for the order [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Telangana Urban Areas (Development) Act, 1975",
+          "page_start": 23,
+          "page_end": 23
+        }
+      ],
+      "seconds": 2.05,
+      "prompt_tokens_est": 2412,
+      "best_distance": 0.32737058327774116,
+      "keyword_hits": 0,
+      "key_facts": "Not less than five and not more than fifteen days from delivery of the order (section 42(1)).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A09",
+      "answerable": true,
+      "question": "How can I appeal against an assessment of development charges, and within what time?",
+      "found": true,
+      "degraded": false,
+      "answer": "To appeal against an assessment of development charges, you must do so within two months from the date the order was communicated to you. The appeal should be made to the Tribunal in the prescribed form, verified in the prescribed manner, and accompanied by a fee not exceeding two hundred and fifty rupees [4]. If you miss this deadline, the Tribunal may still admit your appeal if you can show sufficient cause for the delay [4].",
+      "note": null,
+      "citations": [
+        {
+          "n": 4,
+          "title": "Telangana Urban Areas (Development) Act, 1975",
+          "page_start": 17,
+          "page_end": 17
+        }
+      ],
+      "seconds": 1.83,
+      "prompt_tokens_est": 2585,
+      "best_distance": 0.36836758234187195,
+      "keyword_hits": 0,
+      "key_facts": "Appeal to the Tribunal within two months of the order being communicated, with a fee not exceeding Rs 250 (section 31).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A10",
+      "answerable": true,
+      "question": "Can I buy a plot in an unapproved layout now and still regularise it under LRS 2020?",
+      "found": true,
+      "degraded": false,
+      "answer": "Yes, you can buy a plot in an unapproved layout and still regularize it under the Layout Regularization Scheme 2020. However, this is subject to the submission of an application along with the sale deed executed prior to the date of notification of the Rules, and payment of the prescribed fees and charges, while also complying with the LRS Rules issued in G.O.Ms.No.131 dated 31-08-2020 [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Layout Regularization Scheme 2020: FAQs",
+          "page_start": 2,
+          "page_end": 2
+        }
+      ],
+      "seconds": 2.74,
+      "prompt_tokens_est": 1658,
+      "best_distance": 0.279938488809542,
+      "keyword_hits": 0,
+      "key_facts": "No; only plots with a registered sale deed executed before 26-08-2020 qualify (Q11).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A11",
+      "answerable": true,
+      "question": "How much must be paid when applying for regularisation of an individual plot under LRS 2020?",
+      "found": true,
+      "degraded": false,
+      "answer": "When applying for regularisation of an individual plot under the Layout Regularization Scheme 2020, an applicant must pay Rs 1,000 at the time of submission of the application. The balance amount must be paid by 31-01-2021 [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Layout Regularization Scheme 2020: FAQs",
+          "page_start": 2,
+          "page_end": 3
+        }
+      ],
+      "seconds": 1.71,
+      "prompt_tokens_est": 1878,
+      "best_distance": 0.3926643505388706,
+      "keyword_hits": 0,
+      "key_facts": "Rs 1,000 for an individual plot (Rs 10,000 for a layout) with the application; the balance by 31-01-2021, in instalments (Q15).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A12",
+      "answerable": true,
+      "question": "Will a plot that falls on a proposed Master Plan road be regularised under LRS?",
+      "found": true,
+      "degraded": false,
+      "answer": "A plot that falls on a proposed Master Plan road will not be regularized under the Layout Regularization Scheme (LRS). Specifically, it is stated that plots affected by a Master Plan road will not be regulated [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Layout Regularization Scheme 2020: FAQs",
+          "page_start": 2,
+          "page_end": 2
+        }
+      ],
+      "seconds": 2.21,
+      "prompt_tokens_est": 1792,
+      "best_distance": 0.3883262086418501,
+      "keyword_hits": 0,
+      "key_facts": "No; plots affected by a Master Plan road will not be regularised (Q10).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A13",
+      "answerable": true,
+      "question": "I built a house on a plot in an unapproved layout. Can the building be regularised under LRS?",
+      "found": true,
+      "degraded": false,
+      "answer": "Yes, you can apply for regularization of your plot under the Layout Regularization Scheme (LRS) if you built your house on a plot in an unapproved layout. However, this is subject to the submission of an application along with the sale deed executed prior to the notification date of the rules, payment of prescribed fees, and compliance with the LRS rules issued in G.O.Ms.No.131 dated 31-08-2020. It is important to note that while the plot can be regularized, there is currently no provision for the regularization of unauthorized buildings themselves [1][2].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Layout Regularization Scheme 2020: FAQs",
+          "page_start": 2,
+          "page_end": 2
+        },
+        {
+          "n": 2,
+          "title": "Layout Regularization Scheme 2020: FAQs",
+          "page_start": 2,
+          "page_end": 3
+        }
+      ],
+      "seconds": 2.69,
+      "prompt_tokens_est": 1837,
+      "best_distance": 0.32465241550359847,
+      "keyword_hits": 0,
+      "key_facts": "The plot can be regularised; there is at present no provision to regularise unauthorised buildings (Q16).",
+      "correct": true,
+      "all_citations_correct": false,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A14",
+      "answerable": true,
+      "question": "What is a Bhudhaar and what determines a permanent Bhudhaar?",
+      "found": true,
+      "degraded": false,
+      "answer": "A Bhudhaar is a unique identification number assigned to a parcel of land, as specified in the Record of Rights. There are two types of Bhudhaar: Temporary and Permanent. A Permanent Bhudhaar is assigned when the geo-referencing of the parcel of land has been completed, indicating that all necessary assessments and verifications have been finalized [2]. The assignment of a Permanent Bhudhaar takes into account factors such as the geographical location of the land, its shape determined by coordinates, and ownership as per the Record of Rights [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 2,
+          "title": "Telangana Bhu Bharati (Record of Rights in Land) Act, 2025",
+          "page_start": 2,
+          "page_end": 3
+        },
+        {
+          "n": 1,
+          "title": "Telangana Bhu Bharati (Record of Rights in Land) Act, 2025",
+          "page_start": 14,
+          "page_end": 15
+        }
+      ],
+      "seconds": 5.86,
+      "prompt_tokens_est": 2073,
+      "best_distance": 0.37042322111738646,
+      "keyword_hits": 1,
+      "key_facts": "A number automatically assigned to every land parcel; the permanent one considers the parcel's location, its shape from corner-point coordinates, and ownership in the Record of Rights (section 9(1)).",
+      "correct": true,
+      "all_citations_correct": false,
+      "recall10_keyword": true,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A15",
+      "answerable": true,
+      "question": "After a sale of agricultural land is registered, who updates the Record of Rights?",
+      "found": true,
+      "degraded": false,
+      "answer": "After a sale of agricultural land is registered, the Recording Authority is responsible for updating the Record of Rights. They will effect the changes and provide a Pass Book-cum-Title Deed to both the transferee and transferor immediately after making the updates. Additionally, an extract of the changes will be furnished to both parties as part of the registered document [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Telangana Bhu Bharati (Record of Rights in Land) Act, 2025",
+          "page_start": 10,
+          "page_end": 11
+        }
+      ],
+      "seconds": 1.44,
+      "prompt_tokens_est": 1791,
+      "best_distance": 0.3872350842814485,
+      "keyword_hits": 1,
+      "key_facts": "The Tahsildar, immediately after registration, moves the land from the transferor's to the transferee's account (section 5(5)).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": true,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A16",
+      "answerable": true,
+      "question": "Where do I appeal against a Tahsildar's order amending the Record of Rights, and within how many days?",
+      "found": true,
+      "degraded": false,
+      "answer": "You can appeal against a Tahsildar's order amending the Record of Rights to the Revenue Divisional Officer. This appeal must be filed within sixty days from the date of communication of the said order [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Telangana Bhu Bharati (Record of Rights in Land) Act, 2025",
+          "page_start": 17,
+          "page_end": 18
+        }
+      ],
+      "seconds": 1.46,
+      "prompt_tokens_est": 2413,
+      "best_distance": 0.28885277629928285,
+      "keyword_hits": 0,
+      "key_facts": "To the Revenue Divisional Officer within sixty days of the order being communicated (section 15(1)).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A17",
+      "answerable": true,
+      "question": "Can I file a second appeal after the Revenue Divisional Officer decides my Record of Rights appeal?",
+      "found": true,
+      "degraded": false,
+      "answer": "Yes, you can file a second appeal after the Revenue Divisional Officer decides your Record of Rights appeal. According to the Telangana Bhu Bharati (Record of Rights in Land) Act, 2025, a second appeal may be filed before the District Collector within thirty days from the date of communication of the orders passed by the Revenue Divisional Officer. The decision of the District Collector on this second appeal shall be final. Furthermore, if you wish to appeal the District Collector's decision, a second appeal can be filed before the Land Tribunal within thirty days from the communication of the District Collector's orders, and that decision will also be final and conclusive [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Telangana Bhu Bharati (Record of Rights in Land) Act, 2025",
+          "page_start": 18,
+          "page_end": 19
+        }
+      ],
+      "seconds": 3.22,
+      "prompt_tokens_est": 2336,
+      "best_distance": 0.44015316231400037,
+      "keyword_hits": 0,
+      "key_facts": "Yes, to the District Collector within thirty days; the Collector's decision is final (section 15(4)).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A18",
+      "answerable": true,
+      "question": "Are entries in the Record of Rights presumed to be correct?",
+      "found": true,
+      "degraded": false,
+      "answer": "Yes, entries in the Record of Rights are presumed to be true and correct until proven otherwise or amended according to the provisions of the Act [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Telangana Bhu Bharati (Record of Rights in Land) Act, 2025",
+          "page_start": 16,
+          "page_end": 17
+        }
+      ],
+      "seconds": 1.57,
+      "prompt_tokens_est": 1885,
+      "best_distance": 0.46733226842431963,
+      "keyword_hits": 1,
+      "key_facts": "Yes, presumed true and correct until the contrary is proved or the entry is amended under the Act (section 11).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": true,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A19",
+      "answerable": true,
+      "question": "Can agricultural land be used for a non-agricultural purpose without permission?",
+      "found": true,
+      "degraded": false,
+      "answer": "No, agricultural land cannot be used for a non-agricultural purpose without prior permission from the competent authority. An application for such conversion must be made in the prescribed form along with the required conversion tax [1][6]. If agricultural land is converted to non-agricultural use without obtaining this permission, it will be deemed to have been converted improperly, and penalties may apply [4].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Andhra Pradesh Agricultural Land (Conversion for Non-Agricultural Purposes) Act, 2006",
+          "page_start": 2,
+          "page_end": 3
+        },
+        {
+          "n": 6,
+          "title": "Andhra Pradesh Agricultural Land (Conversion for Non-Agricultural Purposes) Act, 2006",
+          "page_start": 3,
+          "page_end": 3
+        },
+        {
+          "n": 4,
+          "title": "Andhra Pradesh Agricultural Land (Conversion for Non-Agricultural Purposes) Act, 2006",
+          "page_start": 3,
+          "page_end": 4
+        }
+      ],
+      "seconds": 1.6,
+      "prompt_tokens_est": 2336,
+      "best_distance": 0.44407055411552554,
+      "keyword_hits": 1,
+      "key_facts": "No; prior permission of the competent authority is required, applied for with the conversion tax (section 3).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": true,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "A20",
+      "answerable": true,
+      "question": "What happens if the conversion tax I paid for converting agricultural land is less than required?",
+      "found": true,
+      "degraded": false,
+      "answer": "If the conversion tax paid for converting agricultural land is found to be less than required, the competent authority will issue a notice to the applicant within 30 days of receiving the application, informing them of the deficit amount. The applicant must then pay this deficit amount within fifteen days of receiving the notice. If no notice is received within 30 days, it is deemed that the amount paid is sufficient for the purpose [1].",
+      "note": null,
+      "citations": [
+        {
+          "n": 1,
+          "title": "Andhra Pradesh Agricultural Land (Conversion for Non-Agricultural Purposes) Act, 2006",
+          "page_start": 3,
+          "page_end": 3
+        }
+      ],
+      "seconds": 2.07,
+      "prompt_tokens_est": 2146,
+      "best_distance": 0.3712655362606112,
+      "keyword_hits": 0,
+      "key_facts": "The authority sends a notice of the deficit within 30 days, payable within 15 days; with no notice in 30 days the amount is deemed sufficient (section 3(3)-(5)).",
+      "correct": true,
+      "all_citations_correct": true,
+      "recall10_keyword": false,
+      "recall10_vector": true,
+      "recall10_hybrid": true
+    },
+    {
+      "id": "U01",
+      "answerable": false,
+      "question": "What is the government guideline value per square yard for land in Hanamkonda in 2025?",
+      "found": false,
+      "degraded": false,
+      "answer": "not found in the documents",
+      "note": null,
+      "citations": [],
+      "seconds": 1.11,
+      "prompt_tokens_est": 2370,
+      "best_distance": 0.5429932555055178,
+      "keyword_hits": 0,
+      "key_facts": "Not in the corpus (no place names or rates).",
+      "correct": true
+    },
+    {
+      "id": "U02",
+      "answerable": false,
+      "question": "When will the Mamnoor airport be completed?",
+      "found": false,
+      "degraded": false,
+      "answer": "not found in the documents",
+      "note": null,
+      "citations": [],
+      "seconds": 0.39,
+      "prompt_tokens_est": 0,
+      "best_distance": 0.6860824895240061,
+      "keyword_hits": 0,
+      "key_facts": "Not in the corpus.",
+      "correct": true
+    },
+    {
+      "id": "U03",
+      "answerable": false,
+      "question": "How many floors can I build on a 200 square yard residential plot under the KUDA Master Plan 2041?",
+      "found": false,
+      "degraded": false,
+      "answer": "not found in the documents",
+      "note": null,
+      "citations": [],
+      "seconds": 1.15,
+      "prompt_tokens_est": 2104,
+      "best_distance": 0.5141241499484905,
+      "keyword_hits": 0,
+      "key_facts": "Not in the corpus (the KUDA Master Plan 2041 report and its regulations are not public).",
+      "correct": true
+    },
+    {
+      "id": "U04",
+      "answerable": false,
+      "question": "What GST rate applies when buying an apartment that is under construction?",
+      "found": false,
+      "degraded": false,
+      "answer": "not found in the documents",
+      "note": null,
+      "citations": [],
+      "seconds": 1.12,
+      "prompt_tokens_est": 2334,
+      "best_distance": 0.5516807252539828,
+      "keyword_hits": 0,
+      "key_facts": "Not in the corpus.",
+      "correct": true
+    },
+    {
+      "id": "U05",
+      "answerable": false,
+      "question": "Which villages are inside the Kakatiya Urban Development Authority area?",
+      "found": false,
+      "degraded": false,
+      "answer": "not found in the documents",
+      "note": null,
+      "citations": [],
+      "seconds": 1.05,
+      "prompt_tokens_est": 2281,
+      "best_distance": 0.45737176744161734,
+      "keyword_hits": 0,
+      "key_facts": "Not in the corpus.",
+      "correct": true
+    }
+  ]
+}
