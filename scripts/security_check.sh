@@ -50,6 +50,10 @@ for svc in api web; do
   u=$(docker compose exec -T "$svc" id -u 2>/dev/null)
   [ -n "$u" ] && [ "$u" != "0" ] && pass "$svc container runs as non-root (uid $u)" || fail "$svc container runs as non-root (uid ${u:-?})"
 done
-git ls-files | grep -qE '(^|/)\.env$' && fail ".env is not tracked by git" || pass ".env is not tracked by git"
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git ls-files | grep -qE '(^|/)\.env$' && fail ".env is not tracked by git" || pass ".env is not tracked by git"
+else
+  pass ".env tracking: not a git checkout (the zip excludes .env)"
+fi
 
 [ "$FAIL" = 0 ] && echo "security check OK" || { echo "security check FAILED"; exit 1; }

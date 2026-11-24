@@ -7,23 +7,27 @@ credits; it is not a marketplace. **All land data in this build is synthetic** (
 
 ## Prerequisites
 
-- Docker with Docker Compose v2 (`docker compose version`), about 6 GB free disk
+- Docker with Docker Compose v2 (`docker compose version`), about 8 GB free disk (images ~5 GB)
 - `make`
 - **Port 80 free** (only Caddy publishes a port; stop any local web server first)
 - Internet access while the images build (Docker base images, npm, PyPI, Google Fonts). Seeding needs no network.
 
 ## Run it
 
-From this folder:
+Unzip and enter the folder (from a git checkout, use the `landlens/` folder instead):
 
 ```
+unzip landlens-submission.zip
+cd landlens-submission
 make up          # builds and starts the stack; first run creates .env with random local secrets
-make seed SF=1   # generates the database: 100k parcels, ~343k sales, documents
+make seed SF=1   # generates the database: 100k parcels, ~343k sales, the documents
 ```
 
-Expected time on a laptop: `make up` about 8-12 minutes the first time (image builds), `make seed SF=1` about
-2-3 minutes. Then open **http://localhost** (use `localhost`, not `127.0.0.1`: the session cookie is
-`Secure`, and browsers only accept that over plain HTTP on `localhost`).
+Measured on the fresh-machine test (2026-11-24, 12-core laptop): `make up` 1.9 min and `make seed SF=1`
+2.7 min, with Docker base images already downloaded. On a machine without them, the first `make up` also pulls
+about 2 GB of images and packages: allow 10-20 minutes depending on the connection. Then open
+**http://localhost** (use `localhost`, not `127.0.0.1`: the session cookie is `Secure`, and browsers only accept
+that over plain HTTP on `localhost`).
 
 `make up` writes `.env` from `.env.example` only if `.env` does not exist; it never changes an existing one.
 
