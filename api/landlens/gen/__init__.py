@@ -1,4 +1,5 @@
-"""Seeded synthetic data generator over real geography (spec 2.12, ADR-008)."""
+"""Seeded synthetic data generator (spec 2.12, ADR-008). With real inputs in seed_inputs/ (OSM export, projects,
+zones) it builds over real geography; without them, as shipped, villages, roads, projects and zones are fallbacks."""
 
 from __future__ import annotations
 

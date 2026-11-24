@@ -449,9 +449,12 @@ function FullReport({ r }: { r: api.Report }) {
         </section>
 
         <section className="card p-5" aria-labelledby="loc-h">
-          <h2 id="loc-h" className="mb-2.5 text-[22px]">
-            Location
-          </h2>
+          <div className="mb-2.5 flex items-baseline justify-between gap-2">
+            <h2 id="loc-h" className="text-[22px]">
+              Location
+            </h2>
+            <SyntheticBadge label="Synthetic projects and roads" />
+          </div>
           {projects.slice(0, 3).map((p) => (
             <div key={p.project_id} className="flex justify-between gap-3 border-t border-border py-2 text-[14px]">
               <span className="text-muted">
@@ -474,9 +477,10 @@ function FullReport({ r }: { r: api.Report }) {
         </section>
 
         <section className="card px-5 py-4 text-[13px] text-muted">
-          Not legal or financial advice. Parcel boundaries, sales and soil values in this demo are synthetic
-          {synthetic.length ? ` (synthetic here: ${synthetic.join(", ").replace(/_/g, " ")})` : ""}; roads, projects and
-          documents are real where marked. Verify zoning with KUDA before buying. Valuation as of{" "}
+          Not legal or financial advice. Only the government documents and the base map are real. Villages, roads,
+          development projects, zones, parcels, sales, soil and groundwater in this demo are synthetic
+          {synthetic.length ? ` (synthetic in this report: ${synthetic.join(", ").replace(/_/g, " ")})` : ""}. Verify
+          zoning with KUDA before buying. Valuation as of{" "}
           <span className="num">{r.valuation.as_of}</span>.
         </section>
       </aside>

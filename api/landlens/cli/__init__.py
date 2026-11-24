@@ -11,7 +11,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("migrate", help="apply numbered SQL migrations (spec 2.17)")
     p.add_argument("--phase", choices=("schema", "post-load", "all"), default="schema")
-    p = sub.add_parser("gen", help="generate the synthetic dataset over real geography (spec 2.12)")
+    p = sub.add_parser("gen", help="generate the synthetic dataset (spec 2.12); without seed_inputs OSM/projects/zones every layer is a fallback")
     p.add_argument("--sf", type=float, default=1.0)
     p.add_argument("--seed", type=int, default=42)
     sub.add_parser("osm-load", help="check the Overpass export in seed_inputs/osm (loaded by gen, step 1)")

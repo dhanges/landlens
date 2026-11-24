@@ -49,6 +49,7 @@ export function Legend({ zoomedOut }: { zoomedOut: boolean }) {
         <span className="ml-2 w-7 border-t-2 border-dashed border-accent" />
         <span>projects</span>
       </div>
+      <div className="mt-1.5">Base map real (OpenStreetMap); all LandLens layers synthetic</div>
     </div>
   );
 }

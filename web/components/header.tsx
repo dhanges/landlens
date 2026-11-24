@@ -108,7 +108,7 @@ export function Footer() {
     <footer className="no-print border-t border-border">
       <div className="mx-auto flex max-w-page flex-wrap justify-between gap-4 px-8 py-6 text-[13px] text-muted">
         <span>LandLens · Kakatiya (Warangal) Development Area</span>
-        <span>Not legal or financial advice. This demo uses synthetic parcel and price data.</span>
+        <span>Not legal or financial advice. Only the documents and the base map are real; all land data here is synthetic.</span>
       </div>
     </footer>
   );

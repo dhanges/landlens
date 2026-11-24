@@ -214,7 +214,7 @@ export function ScreenerPanel({
             : `Show ${int(count.data)} ${count.data === 1 ? "parcel" : "parcels"}`}
       </Button>
       {dirty && <p className="mt-2 text-center text-[12px] text-muted">Filters changed: press to update the map and list.</p>}
-      <p className="mt-4 text-[12px] text-muted">Sample data. Parcels cover the urban core and growth corridors.</p>
+      <p className="mt-4 text-[12px] text-muted">Synthetic data: villages, roads, projects, zones, parcels and prices. Parcels cover the urban core and growth corridors.</p>
     </aside>
   );
 }

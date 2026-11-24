@@ -7,10 +7,12 @@ SF5_DB := landlens_sf5
 # the bench service runs as the host user (results/*.csv not root-owned)
 BENCH := UID=$(shell id -u) GID=$(shell id -g) $(COMPOSE) run --rm
 
-.PHONY: up down seed verify migrate bench seed-sf5 bench-sf5 test concurrency ingest-dry ingest eval demo-concurrency backup restore security-check audit pgbench charts
+.PHONY: up down seed verify migrate bench seed-sf5 bench-sf5 test concurrency ingest-dry ingest eval demo-concurrency backup restore security-check audit pgbench charts zip er
 
 # Build and start the stack; the one-shot `migrate` service applies the schema phase first (spec 2.17).
+# First run: creates .env from .env.example with random local secrets (an existing .env is never touched).
 up:
+	sh scripts/make_env.sh
 	$(COMPOSE) up -d --build --wait
 	$(COMPOSE) logs migrate | tail -3
 
@@ -56,6 +58,31 @@ ingest:
 # 25-question eval (spec 2.13): calls /chat's pipeline with your key (paid: ~25 embeddings + up to 25 LLM calls)
 eval:
 	$(BENCH) bench python /app/bench/rag_eval.py $(EVAL_ARGS)
+
+# Submission zip (spec 3.3 M7): dist/landlens-submission.zip with one top-level folder landlens-submission/.
+# Excludes .env, data volumes and backups, node_modules, build output and caches; seed_inputs/ is included so a
+# fresh machine seeds without downloads or an OpenAI key. Needs only make + zip (the harness runs it in Alpine);
+# then runs the zip_contents check (harness/zipcheck.py) when python3 is available, and prints the size.
+ZIP := dist/landlens-submission.zip
+zip:
+	mkdir -p dist
+	rm -f $(ZIP) dist/landlens-submission
+	ln -s .. dist/landlens-submission
+	cd dist && zip -qr landlens-submission.zip landlens-submission \
+	  -x 'landlens-submission/dist/*' 'landlens-submission/backups/*' 'landlens-submission/data/*' \
+	     '*/.env' '*/.env.local' '*/.env.*.local' '*/pgdata/*' '*/wal_archive/*' \
+	     '*/node_modules/*' '*/.next/*' '*/out/*' '*/__pycache__/*' '*.pyc' '*/.pytest_cache/*' '*/.ruff_cache/*' \
+	     '*/.venv/*' '*/*.egg-info/*' '*.tsbuildinfo' 'landlens-submission/web/next-env.d.ts' \
+	     'landlens-submission/web/public/maplibre/*' '*/.DS_Store'
+	rm -f dist/landlens-submission
+	@if unzip -l $(ZIP) | awk '{print $$4}' | grep -E '(^|/)\.env$$' >/dev/null; then echo "FORBIDDEN: .env in zip"; exit 1; fi
+	@if command -v python3 >/dev/null 2>&1 && [ -f ../harness/zipcheck.py ]; then python3 ../harness/zipcheck.py $(ZIP); \
+	  else echo "zip_contents: harness/zipcheck.py not available here; .env check above passed"; fi
+	@ls -lh $(ZIP) | awk '{print "size:", $$5, "  path:", $$9}'
+
+# ER diagram (Mermaid) from the migrated schema: report/er-diagram.mmd
+er:
+	python3 scripts/er_diagram.py
 
 # Security (SECURITY.md): headers/limits/guards against the running stack; dependency audit against OSV
 security-check:

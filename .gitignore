@@ -13,5 +13,8 @@ __pycache__/
 /api/dist/
 /api/build/
 
+# make zip output
+/dist/
+
 # pg_dump backups (make backup); the restore drill writes bench/results/restore_drill.txt
 /backups/

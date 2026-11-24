@@ -117,6 +117,13 @@ Demo login: demo@landlens.local / demolandlens (local only; 10 credits).
 | Restore drill restores into a throwaway container from the db image (roles created by the script) | 0831a12 |
 | Security: CSP keeps script-src 'unsafe-inline' (Next.js inline bootstrap); CrossSiteGuard accepts X-Forwarded-Host (dev proxy); API_DOCS toggle | 8acd031 |
 
+## What is real
+Only the four corpus PDFs (and the OpenFreeMap base map in the browser) are real. Villages and boundaries,
+mandals, roads and water in our layers, development projects and statuses, zones, parcels, sales, guideline
+rates, soil and groundwater are synthetic fallbacks (no OSM export, projects GeoJSON or zone list supplied).
+Real OSM inputs are a V1 item. UI, README, sources.md and this file say so; earlier notes saying roads or
+projects were real were wrong.
+
 ## Open fallbacks (all `source='synthetic'`, names `[fallback] ...`; see `seed_inputs/README.md`)
 - `seed_inputs/osm/*.json`: missing -> synthetic villages, radial roads, road grid, tanks, amenities.
   Produce with `api/landlens/gen/overpass_query.ql`.
