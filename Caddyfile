@@ -1,20 +1,69 @@
-# LandLens reverse proxy (spec 2.2, 2.17). Plain HTTP on :80 locally; HTTPS is
-# V1 (spec 2.15). Routes:
-#   /tiles/*  -> martin:3000, with the /tiles prefix stripped (Martin serves
-#               /{source}/{z}/{x}/{y}); cache headers on tiles (spec 2.17).
-#   /api/*    -> api:8000, prefix kept (FastAPI serves /api/health, /api/docs).
-#   /         -> web:3000 (Next.js).
+# LandLens reverse proxy (spec 2.2, 2.15, 2.17). Plain HTTP on :80 locally; HTTPS is V1 (see SECURITY.md for the
+# hosted block with automatic HTTPS + HSTS). Routes:
+#   /tiles/*  -> martin:3000, prefix stripped, GET/HEAD only, cache headers (spec 2.17)
+#   /api/*    -> api:8000, prefix kept; bodies capped at 64 KB
+#   /         -> web:3000 (Next.js)
+# Hardening (SECURITY.md): security headers on every response, a Content-Security-Policy per route, no Server
+# header, request-size and slow-client limits.
+{
+	servers {
+		timeouts {
+			read_header 10s
+			read_body 30s
+			write 90s
+			idle 2m
+		}
+		max_header_size 32KB
+	}
+}
+
+(security_headers) {
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		-Server
+		-X-Powered-By
+		defer
+	}
+}
+
 :80 {
+	import security_headers
+
 	handle_path /tiles/* {
+		@write not method GET HEAD
+		respond @write "method not allowed" 405
 		header Cache-Control "public, max-age=3600"
+		header Content-Security-Policy "default-src 'none'; frame-ancestors 'none'"
 		reverse_proxy martin:3000
 	}
 
 	handle /api/* {
+		request_body {
+			max_size 64KB
+		}
+		# JSON responses: nothing may load or frame them
+		@json not path /api/documents/* /api/docs /api/docs/* /api/openapi.json
+		header @json Content-Security-Policy "default-src 'none'; frame-ancestors 'none'"
+		# Swagger UI (FastAPI) loads its assets from jsDelivr
+		@docs path /api/docs /api/docs/*
+		header @docs Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://fastapi.tiangolo.com; frame-ancestors 'none'"
+		# PDFs open in the browser's own viewer, which a strict default-src would break
+		@pdf path /api/documents/*
+		header @pdf Content-Security-Policy "frame-ancestors 'none'"
 		reverse_proxy api:8000
 	}
 
 	handle {
+		request_body {
+			max_size 64KB
+		}
+		# Next.js inlines its bootstrap scripts and the no-flash theme script, so script-src keeps 'unsafe-inline'
+		# (no 'unsafe-eval'); nonce-based CSP is V1. MapLibre: OpenFreeMap tiles/glyphs, a same-origin module worker.
+		header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://tiles.openfreemap.org; worker-src 'self' blob:; child-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 		reverse_proxy web:3000
 	}
 }

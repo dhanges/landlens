@@ -43,6 +43,10 @@ class Settings:
 def _jwt_secret() -> str:
     secret = os.environ.get("JWT_SECRET", "")
     if secret:
+        if len(secret.encode()) < 32:
+            # HS256 keys under 32 bytes are brute-forceable offline from one captured token (RFC 7518 3.2)
+            log.warning("JWT_SECRET is %d bytes; use at least 32 random bytes (openssl rand -hex 32)",
+                        len(secret.encode()))
         return secret
     # Fallback so `make up` works with an empty JWT_SECRET: a key derived from the landlens_api password, which
     # every API worker shares. Logged loudly; set JWT_SECRET in .env for anything beyond local use.

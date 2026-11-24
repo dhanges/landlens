@@ -18,6 +18,10 @@ RUN npm ci --include=dev
 COPY . .
 RUN npm run build
 
+# Run as the image's unprivileged `node` user (SECURITY.md); it owns .next so Next.js can write its cache.
+RUN chown -R node:node /app/.next
+USER node
+
 EXPOSE 3000
 
 # Serve the production build (not the dev server).

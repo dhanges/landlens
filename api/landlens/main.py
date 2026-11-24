@@ -15,6 +15,7 @@ from fastapi import FastAPI
 
 from landlens import __version__
 from landlens.app import config, errors
+from landlens.app.csrf import CrossSiteGuard
 from landlens.app.db import make_pool
 from landlens.app.ratelimit import SlidingWindow
 from landlens.app.routers import auth, chat, credits, health, parcels, reports, screener, search, trends
@@ -47,9 +48,11 @@ async def lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="LandLens API", version=__version__, docs_url="/api/docs",
-                  openapi_url="/api/openapi.json", redoc_url=None, lifespan=lifespan)
+    docs = os.environ.get("API_DOCS", "true").strip().lower() not in ("0", "false", "no", "off")
+    app = FastAPI(title="LandLens API", version=__version__, docs_url="/api/docs" if docs else None,
+                  openapi_url="/api/openapi.json" if docs else None, redoc_url=None, lifespan=lifespan)
     errors.install(app)
+    app.add_middleware(CrossSiteGuard)
     app.add_middleware(TimingMiddleware)
     for r in (health, auth, search, parcels, reports, credits, screener, trends, chat):
         app.include_router(r.router, prefix="/api")
