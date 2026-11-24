@@ -57,7 +57,7 @@ export default function Home() {
               <Metric label="Master plan zone" value="Residential" sub="KUDA 2041" className="text-base font-medium" />
               <Metric label="Groundwater" value="Semi-critical" sub="mandal level" className="text-base font-medium" />
             </div>
-            <p className="mt-4 text-[12px] text-muted">Sample data</p>
+            <p className="mt-4 text-[12px] text-muted">Sample data, not a real parcel</p>
           </div>
         </section>
 
