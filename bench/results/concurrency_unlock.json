@@ -2,7 +2,7 @@
   "requests": 1000,
   "credits": 10,
   "base": "http://caddy",
-  "wall_s": 9.692,
+  "wall_s": 11.488,
   "statuses": {
     "200": 10,
     "402": 990
@@ -11,9 +11,9 @@
     "402:insufficient_credits": 990
   },
   "latency_ms": {
-    "p50": 5934.4,
-    "p95": 8807.1,
-    "max": 9549.2
+    "p50": 6137.5,
+    "p95": 10515.9,
+    "max": 11266.9
   },
   "db": {
     "credit_balance": 0,

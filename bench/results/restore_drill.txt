@@ -1,0 +1,14 @@
+restore drill 2026-11-24T10:26:07Z
+dump: backups/landlens_20261124_155256.dump (16M); pg_restore -j 4 into a fresh container took 177 s
+check                live                               restored                           match
+app_user             1                                  1                                  yes
+credit_ledger        2                                  2                                  yes
+document_chunk       149                                149                                yes
+mv_parcel_metrics    99483                              99483                              yes
+parcel               99483                              99483                              yes
+report_unlock        0                                  0                                  yes
+sales checksum       bc2e2786cc7aa3e8dd0d4a883ff88b2c   bc2e2786cc7aa3e8dd0d4a883ff88b2c   yes
+sale_transaction     342686                             342686                             yes
+schema_migrations    14                                 14                                 yes
+sum credit_balance   10                                 10                                 yes
+sum ledger delta     10                                 10                                 yes

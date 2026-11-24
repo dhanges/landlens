@@ -1,4 +1,4 @@
-# LandLens handoff (M0-M5, 2026-11-23)
+# LandLens handoff (M0-M6, 2026-11-24)
 
 Spec: `docs/` (PRD, Tech Spec, Roadmap, ADRs). Owner decisions `registry/decisions/DEC-*` override it.
 
@@ -31,8 +31,15 @@ Spec: `docs/` (PRD, Tech Spec, Roadmap, ADRs). Owner decisions `registry/decisio
   `seed_inputs/docs/embeddings/`, idempotent by sha256, `seed` restores from dumps), `POST /api/chat` (one hybrid
   RRF statement, not-found rule, citation check, degraded keyword-only mode, 20/min), `GET /api/documents/{id}/file`,
   chat panel on the report + `/chat` page, Q8 rotating benchmark, 25 draft eval questions + `bench/rag_eval.py`.
-  **Not yet run with a key**: the corpus is not embedded (0 documents in the DB), Q8 rows are not in sf1.csv,
-  the eval has not run.
+  The owner embedded the corpus (dumps committed) and ran the eval: 95 % correct citations, 5/5 refusals; the
+  answer checks added afterwards score that run 16/20 and the prompt got accuracy rules (re-run `make eval`).
+- **M6** clean SF1 seed + SF5 re-seed; final benchmarks at SF1 and SF5 (`bench/results/sf*.csv`), pgbench on the
+  screener (`pgbench_*.csv`), SVG charts (`bench/charts/`); three-version concurrency demo (`make demo-concurrency`,
+  `bench/results/concurrency_demo.txt`); backup + restore drill (`make backup`, `make restore`,
+  `bench/results/restore_drill.txt`); journeys J1, J2, J4, J5 in Chromium + Firefox, light + dark, no console
+  errors, J3 UI with /api/chat stubbed (`bench/results/journeys_m6.json`); 1,000-unlock test passes again.
+- **Security** (SECURITY.md): Caddy headers + per-route CSP, body/time limits, cross-site guard, non-root
+  containers; `make security-check` (all OK), `make audit` (0 known vulnerabilities).
 
 ## How to run (from landlens/, with your .env)
 ```
@@ -46,6 +53,10 @@ make concurrency   # 1,000 parallel unlocks against the running stack via Caddy 
 make ingest-dry    # free: parse + chunk the corpus, flagged pages, token count and cost (~$0.001)
 make ingest        # PAID (OPENAI_API_KEY in .env): embed + insert + write the dump; re-running is a no-op
 make bench Q=Q8    # free once ingested: Q8 latency + HNSW recall into bench/results/sf1.csv
+make demo-concurrency   # broken / row lock / SERIALIZABLE transcript (free)
+make backup && make restore   # pg_dump -Fc, then a drill into a fresh container compared with live (~3 min)
+make pgbench [DB=landlens_sf5] && make charts   # screener throughput; SVG charts into bench/charts/
+make security-check && make audit   # hardening checks against the running stack; OSV dependency audit
 make eval          # PAID (~$0.013 with gpt-4o-mini): 25 questions -> bench/results/rag_eval.json; EVAL_ARGS="--dry-run"
 docker compose up -d --build --no-deps --wait web   # after changing web code (production build, ~2 min)
 cd web && LANDLENS_DEV_PROXY=http://localhost npm run dev -- -p 3001   # hot reload; /api and /tiles via Caddy
@@ -100,6 +111,11 @@ Demo login: demo@landlens.local / demolandlens (local only; 10 credits).
 | Degraded mode reuses the hybrid statement keyword-only with OR-ed terms (websearch AND finds little for questions) | 616fe60 |
 | /chat response always has `answer` (null when none) and `note` | 616fe60 |
 | Q8 query vectors = sampled chunk embeddings (free); per-method quality from the eval run; `hybrid_api_statement` variant | 2e0b47e |
+| Eval scores answers with must_include / must_not phrases; prompt rules for yes/no conditions, officers, chained routes | 37004f2 |
+| API Dockerfile installs dependencies in their own cached layer | c1fc293 |
+| Concurrency demo is a script with fixed interleaving (two real sessions) + psql steps for a live recording | 7d80f19 |
+| Restore drill restores into a throwaway container from the db image (roles created by the script) | 0831a12 |
+| Security: CSP keeps script-src 'unsafe-inline' (Next.js inline bootstrap); CrossSiteGuard accepts X-Forwarded-Host (dev proxy); API_DOCS toggle | 8acd031 |
 
 ## Open fallbacks (all `source='synthetic'`, names `[fallback] ...`; see `seed_inputs/README.md`)
 - `seed_inputs/osm/*.json`: missing -> synthetic villages, radial roads, road grid, tanks, amenities.
@@ -145,8 +161,13 @@ Demo login: demo@landlens.local / demolandlens (local only; 10 credits).
 - Q9 trigram unused on 185 villages.
 - `harness/` and `registry/` are frozen since direct building started; their task statuses are stale.
 
+- SF5 results to explain in the report: Q3 KNN comparables 794 ms at SF5 (report endpoint latency); Q7 BRIN
+  (18.5 ms) is slower than the btree (7.8 ms) and the plain scan (17.7 ms) on yearly partitions; pgbench on the
+  screener tops out near 324 tps (SF1) / 198 tps (SF5) at 32 clients on this laptop.
+- J3 was not walked live with the key (no OpenAI calls by the agent); the owner should ask one question once.
+- A local PostgreSQL on the host listens on 127.0.0.1:5432; it is not LandLens (the db container publishes nothing).
+
 ## Next
-Owner: review `bench/rag_eval_questions.json`, set OPENAI_API_KEY (and LLM_MODEL) in .env, `make ingest`,
-`make bench Q=Q8`, `make eval`; tune CHAT_MAX_DISTANCE on the eval if refusals or misses are off.
-Then M6: journeys on a clean seed, final benchmarks (SF5 re-run incl. the M2/M5 variants), the three-version
-concurrency demo (spec 2.11), backup/restore drill. Watchlist stays a stretch.
+M7: README (prerequisites, `make up && make seed SF=1`, demo login, what is synthetic), fresh-machine test
+(`docker compose down -v`, clone, follow the README), zip without .env or volumes. M8: report and slides.
+Owner: `make eval` once more to measure the prompt fix; replace JWT_SECRET with `openssl rand -hex 32`.

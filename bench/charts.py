@@ -20,6 +20,11 @@ FONT = "font-family='Schibsted Grotesk, Helvetica, Arial, sans-serif'"
 MONO = "font-family='IBM Plex Mono, Menlo, monospace'"
 
 
+def fmt(v: float) -> str:
+    """1,430 / 87.9 / 3.52 / 0.17: whole numbers from 100 up, 3 significant digits below."""
+    return f"{v:,.0f}" if v >= 100 else f"{v:.3g}"
+
+
 def esc(s: str) -> str:
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
@@ -80,7 +85,7 @@ def hbars(title: str, subtitle: str, rows: list[tuple[str, list[float | None]]],
                 bw = max(1.5, scale(v) * plot_w) if (not log or v >= ticks[0]) else 1.5
                 s.append(f"<rect x='{x0}' y='{y}' width='{bw:.1f}' height='{bar_h - 3}' fill='{colour}' rx='2'/>")
                 s.append(f"<text x='{x0 + bw + 6:.1f}' y='{y + bar_h - 5}' {MONO} font-size='10' fill='{TEXT}'>"
-                         f"{v:,.3g} {unit if not log else ''}</text>")
+                         f"{fmt(v)} {unit if not log else ''}</text>")
             else:
                 s.append(f"<text x='{x0 + 4}' y='{y + bar_h - 5}' {MONO} font-size='10' fill='{MUTED}'>n/a</text>")
     lx = w - 110

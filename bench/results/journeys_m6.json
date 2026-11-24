@@ -1,0 +1,137 @@
+{
+ "date": "2026-11-24",
+ "stack": "production build via Caddy http://localhost, clean SF1 seed",
+ "browsers": [
+  "Chromium (Playwright 1.65)",
+  "Firefox 159"
+ ],
+ "journeys": {
+  "J1 discover": {
+   "chromium": [
+    {
+     "scheme": "light",
+     "heading": "4,115 parcels match",
+     "errs": []
+    },
+    {
+     "scheme": "dark",
+     "heading": "4,115 parcels match",
+     "errs": []
+    }
+   ],
+   "firefox": [
+    {
+     "scheme": "light",
+     "heading": "4,115 parcels match",
+     "errs": []
+    },
+    {
+     "scheme": "dark",
+     "heading": "4,115 parcels match",
+     "errs": []
+    }
+   ]
+  },
+  "J2 evaluate + unlock": {
+   "chromium": [
+    {
+     "scheme": "light",
+     "balance_after": "2 credits",
+     "after_reload_balance": "2 credits",
+     "zero_credit_cta": "Buy credits",
+     "errs": []
+    },
+    {
+     "scheme": "dark",
+     "balance_after": "2 credits",
+     "after_reload_balance": "2 credits",
+     "zero_credit_cta": "Buy credits",
+     "errs": []
+    }
+   ],
+   "firefox": [
+    {
+     "scheme": "light",
+     "balance_after": "2 credits",
+     "after_reload_balance": "2 credits",
+     "zero_credit_cta": "Buy credits",
+     "errs": []
+    },
+    {
+     "scheme": "dark",
+     "balance_after": "2 credits",
+     "after_reload_balance": "2 credits",
+     "zero_credit_cta": "Buy credits",
+     "errs": []
+    }
+   ]
+  },
+  "J3 (chat UI; /api/chat stubbed in the browser, no OpenAI call)": {
+   "chromium": [
+    {
+     "inline": [
+      [
+       "[1]",
+       "/api/documents/4/file#page=9"
+      ],
+      [
+       "[2]",
+       "/api/documents/4/file#page=15"
+      ]
+     ],
+     "errs": []
+    }
+   ]
+  },
+  "J4 trends + J5 top-up": {
+   "chromium": [
+    {
+     "scheme": "light",
+     "trend_title": "Kazipet",
+     "mandal_title": "Mandal 05",
+     "header_balance": "8 credits",
+     "ledger": [
+      "Credit pack (mock payment) | — | +5",
+      "Signup bonus | — | +3"
+     ],
+     "errs": []
+    },
+    {
+     "scheme": "dark",
+     "trend_title": "Kazipet",
+     "mandal_title": "Mandal 05",
+     "header_balance": "8 credits",
+     "ledger": [
+      "Credit pack (mock payment) | — | +5",
+      "Signup bonus | — | +3"
+     ],
+     "errs": []
+    }
+   ],
+   "firefox": [
+    {
+     "scheme": "light",
+     "trend_title": "Kazipet",
+     "mandal_title": "Mandal 05",
+     "header_balance": "8 credits",
+     "ledger": [
+      "Credit pack (mock payment) | — | +5",
+      "Signup bonus | — | +3"
+     ],
+     "errs": []
+    },
+    {
+     "scheme": "dark",
+     "trend_title": "Kazipet",
+     "mandal_title": "Mandal 05",
+     "header_balance": "8 credits",
+     "ledger": [
+      "Credit pack (mock payment) | — | +5",
+      "Signup bonus | — | +3"
+     ],
+     "errs": []
+    }
+   ]
+  }
+ }
+}

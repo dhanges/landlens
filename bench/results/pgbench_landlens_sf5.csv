@@ -1,0 +1,3 @@
+clients,tps,latency_avg_ms,transactions,duration_s
+8,162.327480,49.283,4881,30
+32,197.749952,161.821,5958,30

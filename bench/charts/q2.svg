@@ -1,0 +1,45 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='890' height='320' viewBox='0 0 890 320'>
+<rect width='890' height='320' fill='#FFFFFF'/>
+<text x='20' y='30' font-family='Schibsted Grotesk, Helvetica, Arial, sans-serif' font-size='18' fill='#1E2420'>Q2 parcels near an active project</text>
+<text x='20' y='50' font-family='Schibsted Grotesk, Helvetica, Arial, sans-serif' font-size='12' fill='#62675F'>median of 10 runs, EXPLAIN (ANALYZE, BUFFERS), warm cache</text>
+<line x1='250.0' y1='70' x2='250.0' y2='280' stroke='#E3DED4'/>
+<text x='250.0' y='296' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#62675F' text-anchor='middle'>10</text>
+<line x1='380.0' y1='70' x2='380.0' y2='280' stroke='#E3DED4'/>
+<text x='380.0' y='296' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#62675F' text-anchor='middle'>100</text>
+<line x1='510.0' y1='70' x2='510.0' y2='280' stroke='#E3DED4'/>
+<text x='510.0' y='296' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#62675F' text-anchor='middle'>1000</text>
+<line x1='640.0' y1='70' x2='640.0' y2='280' stroke='#E3DED4'/>
+<text x='640.0' y='296' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#62675F' text-anchor='middle'>10000</text>
+<line x1='770.0' y1='70' x2='770.0' y2='280' stroke='#E3DED4'/>
+<text x='770.0' y='296' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#62675F' text-anchor='middle'>100000</text>
+<text x='510' y='312' font-family='Schibsted Grotesk, Helvetica, Arial, sans-serif' font-size='11' fill='#62675F' text-anchor='middle'>ms (log scale)</text>
+<text x='240' y='97' font-family='Schibsted Grotesk, Helvetica, Arial, sans-serif' font-size='12' fill='#1E2420' text-anchor='end'>no_index</text>
+<rect x='250' y='80' width='316.5' height='11' fill='#3F5E4A' rx='2'/>
+<text x='572.5' y='89' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#1E2420'>2,722 </text>
+<rect x='250' y='94' width='418.0' height='11' fill='#7A5A40' rx='2'/>
+<text x='674.0' y='103' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#1E2420'>16,414 </text>
+<text x='240' y='135' font-family='Schibsted Grotesk, Helvetica, Arial, sans-serif' font-size='12' fill='#1E2420' text-anchor='end'>gist</text>
+<rect x='250' y='118' width='216.8' height='11' fill='#3F5E4A' rx='2'/>
+<text x='472.8' y='127' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#1E2420'>465 </text>
+<rect x='250' y='132' width='337.2' height='11' fill='#7A5A40' rx='2'/>
+<text x='593.2' y='141' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#1E2420'>3,924 </text>
+<text x='240' y='173' font-family='Schibsted Grotesk, Helvetica, Arial, sans-serif' font-size='12' fill='#1E2420' text-anchor='end'>gist_partial</text>
+<rect x='250' y='156' width='222.7' height='11' fill='#3F5E4A' rx='2'/>
+<text x='478.7' y='165' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#1E2420'>516 </text>
+<rect x='250' y='170' width='342.4' height='11' fill='#7A5A40' rx='2'/>
+<text x='598.4' y='179' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#1E2420'>4,302 </text>
+<text x='240' y='211' font-family='Schibsted Grotesk, Helvetica, Arial, sans-serif' font-size='12' fill='#1E2420' text-anchor='end'>gist_subdivided</text>
+<rect x='250' y='194' width='202.9' height='11' fill='#3F5E4A' rx='2'/>
+<text x='458.9' y='203' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#1E2420'>364 </text>
+<rect x='250' y='208' width='303.5' height='11' fill='#7A5A40' rx='2'/>
+<text x='559.5' y='217' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#1E2420'>2,161 </text>
+<text x='240' y='249' font-family='Schibsted Grotesk, Helvetica, Arial, sans-serif' font-size='12' fill='#1E2420' text-anchor='end'>impact_lookup</text>
+<rect x='250' y='232' width='40.2' height='11' fill='#3F5E4A' rx='2'/>
+<text x='296.2' y='241' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#1E2420'>20.4 </text>
+<rect x='250' y='246' width='124.8' height='11' fill='#7A5A40' rx='2'/>
+<text x='380.8' y='255' font-family='IBM Plex Mono, Menlo, monospace' font-size='10' fill='#1E2420'>91.2 </text>
+<rect x='780' y='20' width='12' height='10' fill='#3F5E4A' rx='2'/>
+<text x='798' y='29' font-family='Schibsted Grotesk, Helvetica, Arial, sans-serif' font-size='12' fill='#1E2420'>SF1</text>
+<rect x='780' y='38' width='12' height='10' fill='#7A5A40' rx='2'/>
+<text x='798' y='47' font-family='Schibsted Grotesk, Helvetica, Arial, sans-serif' font-size='12' fill='#1E2420'>SF5</text>
+</svg>
