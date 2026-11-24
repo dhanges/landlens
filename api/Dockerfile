@@ -11,8 +11,11 @@ WORKDIR /app
 # Install dependencies first for layer caching. psycopg[binary] ships wheels,
 # so no libpq build toolchain is needed in M0.
 COPY pyproject.toml ./
+# Dependencies in their own layer (an empty package stands in for the code), so a code change does not
+# re-download numpy, shapely, pymupdf, ... on every build.
+RUN mkdir landlens && touch landlens/__init__.py && pip install . && pip uninstall -y landlens-api && rm -rf landlens
 COPY landlens ./landlens
-RUN pip install .
+RUN pip install --no-deps .
 
 EXPOSE 8000
 
