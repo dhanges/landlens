@@ -120,8 +120,8 @@ def collect() -> dict:
         counts = psql(db, "SELECT json_build_object(" + ", ".join(f"'{t}', (SELECT count(*) FROM {t})" for t in tables) + ")")
         cat[sf] = {"tables": tables, "counts": counts, "indexes": psql(db, INDEX_SQL), "cons": psql(db, CONS_SQL),
                    "generated": psql(db, GEN_SQL), "mvs": psql(db, MV_SQL), "docs": psql(db, DOCS_SQL) or []}
-    (PACK / "data").mkdir(parents=True, exist_ok=True)
-    (PACK / "data" / "catalog.json").write_text(json.dumps(cat, indent=1, default=str))
+    (PACK / "catalog").mkdir(parents=True, exist_ok=True)
+    (PACK / "catalog" / "catalog.json").write_text(json.dumps(cat, indent=1, default=str))
     return cat
 
 
@@ -150,14 +150,14 @@ def main() -> int:
 
     # 1. summary
     w("## 1. Project summary\n")
-    w("**What is built** (source: `HANDOFF.md`, `README.md`): Docker Compose stack (PostGIS 17 + pgvector, Martin "
+    w("**What is built** (source: `README.md`, the repository): Docker Compose stack (PostGIS 17 + pgvector, Martin "
       "tiles, FastAPI with raw SQL, Next.js, Caddy); a seeded synthetic data generator at scale factors 1 and 5; 15 "
       "numbered migrations (tables, partitions, indexes, materialized views, tile functions, roles); map + screener, "
       "parcel report with a rule-based valuation range, locality trends, credits with a ledger and a row-locked "
       "purchase transaction, document Q&A over 4 government acts with page citations; benchmarks Q1-Q9 at SF1 and "
       "SF5, pgbench, a concurrency harness and demo, backup/restore drill, security hardening.\n")
     w("**Scale: rows per base table** (source: `SELECT count(*)` on each table, live SF1 and SF5 databases, "
-      "2026-11-24; also `report/pack/data/catalog.json`).\n")
+      "2026-11-24; also `report/pack/catalog/catalog.json`).\n")
     w("| Table | SF1 rows | SF5 rows |\n| --- | ---: | ---: |")
     for t in sorted(set(cat["SF1"]["tables"]) | set(cat["SF5"]["tables"])):
         w(f"| `{t}` | {int_(cat['SF1']['counts'].get(t))} | {int_(cat['SF5']['counts'].get(t))} |")
@@ -273,7 +273,7 @@ def main() -> int:
       f"`parcel_project_impact` lookup skips geometry entirely: {m('Q2','impact_lookup','1'):,.0f} / "
       f"{m('Q2','impact_lookup','5'):,.0f} ms (it measures from parcel centroids, so its count differs slightly from "
       f"the geometry variants). Before the M5 data change (5 active projects including two ring roads) plain GiST "
-      f"helped far less, because a ring road's bounding box covers most of the core (HANDOFF, M2 fix).")
+      f"helped far less, because a ring road's bounding box covers most of the core (earlier SF1 run, recorded in the build notes).")
     w(f"- **Q6 selective vs broad.** With the covering index I5, a selective filter returns page 1 in "
       f"{m('Q6','mv_covering_selective_page1','1')} / {m('Q6','mv_covering_selective_page1','5')} ms (SF1 / SF5) "
       f"against {m('Q6','mv_no_covering_selective_page1','1')} / {m('Q6','mv_no_covering_selective_page1','5')} ms "
@@ -455,7 +455,7 @@ def main() -> int:
           f"{int(r['gzip_bytes']) / 1024:,.0f} | {float(r['gzip_warm_s']):.3f} |")
     w("\nTarget: under 150 KB per dense tile; met at z14 (merge per heat class, half-pixel simplification) and z15 "
       "(one feature per parcel, feature id instead of attributes).\n")
-    w("**Fresh-machine test** (source: commit 555639c message, `README.md`): zip unzipped into a new folder, own "
+    w("**Fresh-machine test** (source: the fresh-machine test record in `README.md` and its commit message): zip unzipped into a new folder, own "
       "Compose project, README followed word for word, no `.env` until `make up` created one: `make up` 1.9 min + "
       "`make seed SF=1` 2.7 min = 4.6 min with Docker base images already present; demo login, screener "
       "(99,483 -> 6,692), report unlock (10 -> 9 credits), trends, degraded chat with a PDF citation, `make test` "
@@ -464,7 +464,7 @@ def main() -> int:
 
     # 10. limitations
     w("## 10. Known limitations and V1\n")
-    w("Source: `HANDOFF.md` known issues, `SECURITY.md` residual risks, spec 3.6.\n")
+    w("Source: the build notes' known issues, `SECURITY.md` residual risks, the V1 roadmap.\n")
     for x in [
         "All land data is synthetic (no OSM export, projects GeoJSON or zone list supplied); price bases are placeholders, not calibrated to published Warangal rates.",
         "JIT compilation dominates the comparables (KNN) query at SF5 (~0.9 s of ~0.9 s); `jit = off` would fix it (not applied).",
@@ -514,7 +514,7 @@ def main() -> int:
     for f in sorted((PACK / "figures").glob("*.png")):
         w(f"| `figures/{f.name}` | {captions.get(f.stem, '')} |")
     w("\nOther files in the pack: `er-diagram.mmd` (diagram source), `explain/explain_q*_sf{1,5}.txt` (EXPLAIN "
-      "ANALYZE output quoted above), `data/catalog.json` (the catalog data behind sections 1-3).\n")
+      "ANALYZE output quoted above), `catalog/catalog.json` (the catalog data behind sections 1-3).\n")
 
     (PACK / "report_material.md").write_text("\n".join(md) + "\n")
     print(f"wrote {PACK / 'report_material.md'} ({len(md)} blocks)")

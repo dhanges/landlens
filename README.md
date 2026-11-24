@@ -103,7 +103,6 @@ best match the question, each with its document and page, and says so.
 | `api/` | FastAPI app (raw SQL), the `landlens` CLI (generator, ingest, bench), tests |
 | `web/` | Next.js frontend; design brief in `web/DESIGN.md` |
 | `seed_inputs/` | every input `make seed` needs, with `sources.md` |
-| `HANDOFF.md` | build log: state, decisions outside the spec, known issues |
 
 ## Troubleshooting
 

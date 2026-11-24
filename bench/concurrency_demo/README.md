@@ -1,4 +1,4 @@
-# Live two-terminal concurrency demo (spec 2.11)
+# Live two-terminal concurrency demo
 
 The scripted version is `make demo-concurrency` (writes `bench/results/concurrency_demo.txt`). To record it live,
 open two terminals side by side (e.g. tmux) and in each run:
