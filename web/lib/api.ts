@@ -158,6 +158,9 @@ export interface ProjectNearby {
 export interface TrendPoint {
   yr: number;
   median_price_sqm: number;
+  /** spread of that year's sale prices (migration 015); equal to the median when there is one sale */
+  p25_price_sqm: number | null;
+  p75_price_sqm: number | null;
   n_sales: number;
   yoy: number | null;
   yoy_base_yr: number | null;

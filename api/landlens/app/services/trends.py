@@ -1,6 +1,7 @@
 """Locality trends (FR-5, spec 2.9; DEC-003 OQ-11/OQ-20).
 
-Series items: {yr, median_price_sqm, n_sales, yoy, yoy_base_yr, guideline_sqm}. Years without sales are gaps;
+Series items: {yr, median_price_sqm, p25_price_sqm, p75_price_sqm, n_sales, yoy, yoy_base_yr, guideline_sqm}
+(p25/p75: the spread of sale prices that year, migration 015). Years without sales are gaps;
 yoy compares to the previous year with data (the views' lag), and yoy_base_yr names that year, so a gap shows
 as yoy_base_yr < yr - 1 (spec 2.14). Years after the as-of date are excluded.
 guideline_sqm is the rate in force at the end of the year (latest effective_from <= 31 Dec); for a mandal it is
@@ -16,6 +17,7 @@ from ..db import fetchall
 VILLAGE_SERIES = """
 SELECT i.yr, round(i.median_price_sqm::numeric, 2) AS median_price_sqm, i.n_sales,
        round(i.yoy::numeric, 4) AS yoy, lag(i.yr) OVER (ORDER BY i.yr) AS yoy_base_yr,
+       round(i.p25_price_sqm::numeric, 2) AS p25_price_sqm, round(i.p75_price_sqm::numeric, 2) AS p75_price_sqm,
        (SELECT g.rate_inr_per_sqm FROM guideline_rate g
         WHERE g.village_id = i.village_id AND g.land_class = i.land_type AND g.effective_from <= make_date(i.yr, 12, 31)
         ORDER BY g.effective_from DESC LIMIT 1) AS guideline_sqm
@@ -26,6 +28,7 @@ ORDER BY i.yr"""
 MANDAL_SERIES = """
 SELECT i.yr, round(i.median_price_sqm::numeric, 2) AS median_price_sqm, i.n_sales,
        round(i.yoy::numeric, 4) AS yoy, lag(i.yr) OVER (ORDER BY i.yr) AS yoy_base_yr,
+       round(i.p25_price_sqm::numeric, 2) AS p25_price_sqm, round(i.p75_price_sqm::numeric, 2) AS p75_price_sqm,
        (SELECT round(percentile_cont(0.5) WITHIN GROUP (ORDER BY r.rate)::numeric, 2)
         FROM village v
         CROSS JOIN LATERAL (SELECT g.rate_inr_per_sqm AS rate FROM guideline_rate g

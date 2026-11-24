@@ -160,6 +160,11 @@ def test_village_trend_gaps_and_guideline(client):
     assert [x["n_sales"] for x in s] == [1, 1, 1, 2, 1]
     assert s[0]["yoy"] is None and s[1]["yoy"] == pytest.approx(-0.25) and s[2]["yoy"] == pytest.approx(0.6667)
     assert [x["guideline_sqm"] for x in s] == [None, 2000, 3000, 3000, 3000]   # rate in force on 31 Dec
+    # spread (015): 2025 has 4500 and 6000 -> percentile_cont p25 4875, p75 5625; one-sale years collapse
+    assert [(x["p25_price_sqm"], x["p75_price_sqm"]) for x in s] == [
+        (4000, 4000), (3000, 3000), (5000, 5000), (4875, 5625), (7000, 7000)]
+    m = client.get("/api/trends/mandals/1", params={"land_type": "peri_urban"}).json()["series"]
+    assert (m[3]["p25_price_sqm"], m[3]["p75_price_sqm"]) == (4875, 5625)
 
 
 def test_trend_defaults_and_mandal(client):
