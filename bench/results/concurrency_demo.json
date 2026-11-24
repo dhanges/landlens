@@ -1,0 +1,29 @@
+{
+  "broken": {
+    "start": 5,
+    "purchases": 2,
+    "final_balance": 4,
+    "expected": 3,
+    "lost_update": true
+  },
+  "row_lock": {
+    "start": 5,
+    "purchases": 2,
+    "final_balance": 3,
+    "ledger_sum": 3,
+    "expected": 3,
+    "b_waited_s": 1.52,
+    "b_saw": 4,
+    "correct": true
+  },
+  "serializable": {
+    "start": 5,
+    "purchases": 2,
+    "final_balance": 3,
+    "expected": 3,
+    "sqlstate": "40001",
+    "attempts": 2,
+    "correct": true
+  },
+  "pass": true
+}

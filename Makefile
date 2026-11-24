@@ -7,7 +7,7 @@ SF5_DB := landlens_sf5
 # the bench service runs as the host user (results/*.csv not root-owned)
 BENCH := UID=$(shell id -u) GID=$(shell id -g) $(COMPOSE) run --rm
 
-.PHONY: up down seed verify migrate bench seed-sf5 bench-sf5 test concurrency ingest-dry ingest eval
+.PHONY: up down seed verify migrate bench seed-sf5 bench-sf5 test concurrency ingest-dry ingest eval demo-concurrency
 
 # Build and start the stack; the one-shot `migrate` service applies the schema phase first (spec 2.17).
 up:
@@ -56,6 +56,11 @@ ingest:
 # 25-question eval (spec 2.13): calls /chat's pipeline with your key (paid: ~25 embeddings + up to 25 LLM calls)
 eval:
 	$(BENCH) bench python /app/bench/rag_eval.py $(EVAL_ARGS)
+
+# Three-version concurrency demo (spec 2.11): broken / row lock / SERIALIZABLE, two real sessions, transcript in
+# bench/results/concurrency_demo.txt. Live two-terminal version: bench/concurrency_demo/README.md
+demo-concurrency:
+	$(BENCH) bench python /app/bench/concurrency_demo.py
 
 # 1,000 parallel unlocks by a 10-credit user against the running stack via Caddy (spec 2.11)
 concurrency:
