@@ -63,7 +63,7 @@ function useDebounced<T>(v: T, ms: number): T {
 function Row({ label, value, children }: { label: string; value: string; children: React.ReactNode }) {
   return (
     <div className="mb-6">
-      <div className="mb-[14px] flex justify-between text-[13px] text-muted">
+      <div className="mb-[14px] flex justify-between gap-3 text-[13px] text-muted">
         <span>{label}</span>
         <span className="num text-text">{value}</span>
       </div>

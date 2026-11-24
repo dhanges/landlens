@@ -1,0 +1,1796 @@
+{
+ "SF1": {
+  "tables": [
+   "app_user",
+   "credit_ledger",
+   "dev_project",
+   "district",
+   "document",
+   "document_chunk",
+   "guideline_rate",
+   "gw_assessment",
+   "infra_feature",
+   "mandal",
+   "master_plan",
+   "parcel",
+   "parcel_coverage",
+   "parcel_project_impact",
+   "parcel_zone",
+   "plan_zone",
+   "project_status_history",
+   "report_unlock",
+   "sale_transaction",
+   "schema_migrations",
+   "soil_sample",
+   "spatial_ref_sys",
+   "village",
+   "watchlist",
+   "zone_type"
+  ],
+  "counts": {
+   "app_user": 16,
+   "credit_ledger": 48,
+   "dev_project": 5,
+   "district": 1,
+   "document": 4,
+   "document_chunk": 149,
+   "guideline_rate": 3330,
+   "gw_assessment": 136,
+   "infra_feature": 211,
+   "mandal": 8,
+   "master_plan": 1,
+   "parcel": 99483,
+   "parcel_coverage": 1,
+   "parcel_project_impact": 363994,
+   "parcel_zone": 102190,
+   "plan_zone": 300,
+   "project_status_history": 14,
+   "report_unlock": 26,
+   "sale_transaction": 342686,
+   "schema_migrations": 15,
+   "soil_sample": 2354,
+   "spatial_ref_sys": 8500,
+   "village": 185,
+   "watchlist": 0,
+   "zone_type": 8
+  },
+  "indexes": [
+   {
+    "name": "app_user_email_uq",
+    "tbl": "app_user",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX app_user_email_uq ON public.app_user USING btree (lower(email))",
+    "bytes": 16384
+   },
+   {
+    "name": "app_user_pkey",
+    "tbl": "app_user",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX app_user_pkey ON public.app_user USING btree (user_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "credit_ledger_idempotency_key_key",
+    "tbl": "credit_ledger",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX credit_ledger_idempotency_key_key ON public.credit_ledger USING btree (idempotency_key)",
+    "bytes": 16384
+   },
+   {
+    "name": "credit_ledger_pkey",
+    "tbl": "credit_ledger",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX credit_ledger_pkey ON public.credit_ledger USING btree (entry_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "ledger_user_ix",
+    "tbl": "credit_ledger",
+    "type": "btree",
+    "def": "CREATE INDEX ledger_user_ix ON public.credit_ledger USING btree (user_id, created_at DESC)",
+    "bytes": 16384
+   },
+   {
+    "name": "dev_project_name_key",
+    "tbl": "dev_project",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX dev_project_name_key ON public.dev_project USING btree (name)",
+    "bytes": 16384
+   },
+   {
+    "name": "dev_project_pkey",
+    "tbl": "dev_project",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX dev_project_pkey ON public.dev_project USING btree (project_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "project_geom_gix",
+    "tbl": "dev_project",
+    "type": "gist",
+    "def": "CREATE INDEX project_geom_gix ON public.dev_project USING gist (geom)",
+    "bytes": 8192
+   },
+   {
+    "name": "district_name_key",
+    "tbl": "district",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX district_name_key ON public.district USING btree (name)",
+    "bytes": 16384
+   },
+   {
+    "name": "district_pkey",
+    "tbl": "district",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX district_pkey ON public.district USING btree (district_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "document_pkey",
+    "tbl": "document",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX document_pkey ON public.document USING btree (document_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "document_sha256_key",
+    "tbl": "document",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX document_sha256_key ON public.document USING btree (sha256)",
+    "bytes": 16384
+   },
+   {
+    "name": "chunk_emb_hnsw",
+    "tbl": "document_chunk",
+    "type": "hnsw",
+    "def": "CREATE INDEX chunk_emb_hnsw ON public.document_chunk USING hnsw (embedding vector_cosine_ops)",
+    "bytes": 1228800
+   },
+   {
+    "name": "chunk_tsv_gin",
+    "tbl": "document_chunk",
+    "type": "gin",
+    "def": "CREATE INDEX chunk_tsv_gin ON public.document_chunk USING gin (tsv)",
+    "bytes": 270336
+   },
+   {
+    "name": "document_chunk_pkey",
+    "tbl": "document_chunk",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX document_chunk_pkey ON public.document_chunk USING btree (document_id, chunk_no)",
+    "bytes": 16384
+   },
+   {
+    "name": "guideline_rate_pkey",
+    "tbl": "guideline_rate",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX guideline_rate_pkey ON public.guideline_rate USING btree (village_id, land_class, effective_from)",
+    "bytes": 131072
+   },
+   {
+    "name": "gw_assessment_pkey",
+    "tbl": "gw_assessment",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX gw_assessment_pkey ON public.gw_assessment USING btree (mandal_id, assessment_year)",
+    "bytes": 16384
+   },
+   {
+    "name": "infra_feature_osm_id_key",
+    "tbl": "infra_feature",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX infra_feature_osm_id_key ON public.infra_feature USING btree (osm_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "infra_feature_pkey",
+    "tbl": "infra_feature",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX infra_feature_pkey ON public.infra_feature USING btree (feature_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "infra_geom_gix",
+    "tbl": "infra_feature",
+    "type": "gist",
+    "def": "CREATE INDEX infra_geom_gix ON public.infra_feature USING gist (geom)",
+    "bytes": 8192
+   },
+   {
+    "name": "mandal_district_id_name_key",
+    "tbl": "mandal",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX mandal_district_id_name_key ON public.mandal USING btree (district_id, name)",
+    "bytes": 16384
+   },
+   {
+    "name": "mandal_pkey",
+    "tbl": "mandal",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX mandal_pkey ON public.mandal USING btree (mandal_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "master_plan_pkey",
+    "tbl": "master_plan",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX master_plan_pkey ON public.master_plan USING btree (plan_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "mv_mandal_price_index_mandal_id_land_type_yr_idx",
+    "tbl": "mv_mandal_price_index",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX mv_mandal_price_index_mandal_id_land_type_yr_idx ON public.mv_mandal_price_index USING btree (mandal_id, land_type, yr)",
+    "bytes": 16384
+   },
+   {
+    "name": "pm_parcel_uq",
+    "tbl": "mv_parcel_metrics",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX pm_parcel_uq ON public.mv_parcel_metrics USING btree (parcel_id)",
+    "bytes": 2244608
+   },
+   {
+    "name": "pm_screener_ix",
+    "tbl": "mv_parcel_metrics",
+    "type": "btree",
+    "def": "CREATE INDEX pm_screener_ix ON public.mv_parcel_metrics USING btree (land_type, zone_code, cagr_5y DESC, parcel_id DESC) INCLUDE (price_sqm, nearest_active_project_m, area_sqm)",
+    "bytes": 6758400
+   },
+   {
+    "name": "mv_village_price_index_village_id_land_type_yr_idx",
+    "tbl": "mv_village_price_index",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX mv_village_price_index_village_id_land_type_yr_idx ON public.mv_village_price_index USING btree (village_id, land_type, yr)",
+    "bytes": 49152
+   },
+   {
+    "name": "parcel_centroid_gix",
+    "tbl": "parcel",
+    "type": "gist",
+    "def": "CREATE INDEX parcel_centroid_gix ON public.parcel USING gist (centroid)",
+    "bytes": 4980736
+   },
+   {
+    "name": "parcel_geom_gix",
+    "tbl": "parcel",
+    "type": "gist",
+    "def": "CREATE INDEX parcel_geom_gix ON public.parcel USING gist (geom)",
+    "bytes": 5005312
+   },
+   {
+    "name": "parcel_pkey",
+    "tbl": "parcel",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX parcel_pkey ON public.parcel USING btree (parcel_id)",
+    "bytes": 2244608
+   },
+   {
+    "name": "parcel_village_id_survey_no_sub_div_key",
+    "tbl": "parcel",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX parcel_village_id_survey_no_sub_div_key ON public.parcel USING btree (village_id, survey_no, sub_div)",
+    "bytes": 4931584
+   },
+   {
+    "name": "parcel_coverage_pkey",
+    "tbl": "parcel_coverage",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX parcel_coverage_pkey ON public.parcel_coverage USING btree (scale_factor)",
+    "bytes": 16384
+   },
+   {
+    "name": "impact_project_ix",
+    "tbl": "parcel_project_impact",
+    "type": "btree",
+    "def": "CREATE INDEX impact_project_ix ON public.parcel_project_impact USING btree (project_id, distance_m)",
+    "bytes": 15343616
+   },
+   {
+    "name": "parcel_project_impact_pkey",
+    "tbl": "parcel_project_impact",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX parcel_project_impact_pkey ON public.parcel_project_impact USING btree (parcel_id, project_id)",
+    "bytes": 15212544
+   },
+   {
+    "name": "parcel_zone_pkey",
+    "tbl": "parcel_zone",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX parcel_zone_pkey ON public.parcel_zone USING btree (parcel_id, zone_id)",
+    "bytes": 4415488
+   },
+   {
+    "name": "plan_zone_geom_gix",
+    "tbl": "plan_zone",
+    "type": "gist",
+    "def": "CREATE INDEX plan_zone_geom_gix ON public.plan_zone USING gist (geom)",
+    "bytes": 24576
+   },
+   {
+    "name": "plan_zone_pkey",
+    "tbl": "plan_zone",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX plan_zone_pkey ON public.plan_zone USING btree (zone_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "project_status_active_ix",
+    "tbl": "project_status_history",
+    "type": "btree",
+    "def": "CREATE INDEX project_status_active_ix ON public.project_status_history USING btree (project_id, effective_from DESC) WHERE (status = ANY (ARRAY['sanctioned'::project_status, 'under_construction'::project_status]))",
+    "bytes": 16384
+   },
+   {
+    "name": "project_status_history_pkey",
+    "tbl": "project_status_history",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX project_status_history_pkey ON public.project_status_history USING btree (project_id, effective_from)",
+    "bytes": 16384
+   },
+   {
+    "name": "report_unlock_pkey",
+    "tbl": "report_unlock",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX report_unlock_pkey ON public.report_unlock USING btree (user_id, parcel_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "sale_date_brin",
+    "tbl": "sale_transaction",
+    "type": "brin",
+    "def": "CREATE INDEX sale_date_brin ON ONLY public.sale_transaction USING brin (registered_on)",
+    "bytes": 466944
+   },
+   {
+    "name": "sale_parcel_date_ix",
+    "tbl": "sale_transaction",
+    "type": "btree",
+    "def": "CREATE INDEX sale_parcel_date_ix ON ONLY public.sale_transaction USING btree (parcel_id, registered_on DESC)",
+    "bytes": 13942784
+   },
+   {
+    "name": "sale_transaction_pkey",
+    "tbl": "sale_transaction",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX sale_transaction_pkey ON ONLY public.sale_transaction USING btree (txn_id, registered_on)",
+    "bytes": 11124736
+   },
+   {
+    "name": "schema_migrations_pkey",
+    "tbl": "schema_migrations",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX schema_migrations_pkey ON public.schema_migrations USING btree (filename)",
+    "bytes": 16384
+   },
+   {
+    "name": "soil_geom_gix",
+    "tbl": "soil_sample",
+    "type": "gist",
+    "def": "CREATE INDEX soil_geom_gix ON public.soil_sample USING gist (geom)",
+    "bytes": 122880
+   },
+   {
+    "name": "soil_sample_pkey",
+    "tbl": "soil_sample",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX soil_sample_pkey ON public.soil_sample USING btree (sample_id)",
+    "bytes": 73728
+   },
+   {
+    "name": "spatial_ref_sys_pkey",
+    "tbl": "spatial_ref_sys",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX spatial_ref_sys_pkey ON public.spatial_ref_sys USING btree (srid)",
+    "bytes": 212992
+   },
+   {
+    "name": "village_geom_gix",
+    "tbl": "village",
+    "type": "gist",
+    "def": "CREATE INDEX village_geom_gix ON public.village USING gist (geom)",
+    "bytes": 8192
+   },
+   {
+    "name": "village_lgd_code_key",
+    "tbl": "village",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX village_lgd_code_key ON public.village USING btree (lgd_code)",
+    "bytes": 16384
+   },
+   {
+    "name": "village_name_trgm",
+    "tbl": "village",
+    "type": "gin",
+    "def": "CREATE INDEX village_name_trgm ON public.village USING gin (name gin_trgm_ops)",
+    "bytes": 98304
+   },
+   {
+    "name": "village_pkey",
+    "tbl": "village",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX village_pkey ON public.village USING btree (village_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "watchlist_pkey",
+    "tbl": "watchlist",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX watchlist_pkey ON public.watchlist USING btree (user_id, parcel_id)",
+    "bytes": 8192
+   },
+   {
+    "name": "zone_type_pkey",
+    "tbl": "zone_type",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX zone_type_pkey ON public.zone_type USING btree (zone_code)",
+    "bytes": 16384
+   }
+  ],
+  "cons": [
+   {
+    "tbl": "app_user",
+    "name": "app_user_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (user_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "credit_ledger",
+    "name": "credit_ledger_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "credit_ledger",
+    "name": "credit_ledger_user_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (user_id) REFERENCES app_user(user_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "credit_ledger",
+    "name": "credit_ledger_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (entry_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "credit_ledger",
+    "name": "credit_ledger_idempotency_key_key",
+    "contype": "u",
+    "def": "UNIQUE (idempotency_key)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "dev_project",
+    "name": "dev_project_document_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (document_id) REFERENCES document(document_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "dev_project",
+    "name": "dev_project_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (project_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "dev_project",
+    "name": "dev_project_name_key",
+    "contype": "u",
+    "def": "UNIQUE (name)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "district",
+    "name": "district_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (district_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "district",
+    "name": "district_name_key",
+    "contype": "u",
+    "def": "UNIQUE (name)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "document",
+    "name": "document_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (document_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "document",
+    "name": "document_sha256_key",
+    "contype": "u",
+    "def": "UNIQUE (sha256)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "document_chunk",
+    "name": "document_chunk_document_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (document_id) REFERENCES document(document_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "document_chunk",
+    "name": "document_chunk_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (document_id, chunk_no)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "guideline_rate",
+    "name": "guideline_rate_village_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (village_id) REFERENCES village(village_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "guideline_rate",
+    "name": "guideline_rate_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (village_id, land_class, effective_from)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "gw_assessment",
+    "name": "gw_assessment_mandal_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (mandal_id) REFERENCES mandal(mandal_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "gw_assessment",
+    "name": "gw_assessment_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (mandal_id, assessment_year)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "infra_feature",
+    "name": "infra_feature_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (feature_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "infra_feature",
+    "name": "infra_feature_osm_id_key",
+    "contype": "u",
+    "def": "UNIQUE (osm_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "mandal",
+    "name": "mandal_district_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (district_id) REFERENCES district(district_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "mandal",
+    "name": "mandal_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (mandal_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "mandal",
+    "name": "mandal_district_id_name_key",
+    "contype": "u",
+    "def": "UNIQUE (district_id, name)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "master_plan",
+    "name": "master_plan_document_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (document_id) REFERENCES document(document_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "master_plan",
+    "name": "master_plan_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (plan_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "parcel",
+    "name": "parcel_village_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (village_id) REFERENCES village(village_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "parcel",
+    "name": "parcel_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (parcel_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "parcel",
+    "name": "parcel_village_id_survey_no_sub_div_key",
+    "contype": "u",
+    "def": "UNIQUE (village_id, survey_no, sub_div)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "parcel_coverage",
+    "name": "parcel_coverage_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (scale_factor)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "parcel_project_impact",
+    "name": "parcel_project_impact_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "parcel_project_impact",
+    "name": "parcel_project_impact_project_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (project_id) REFERENCES dev_project(project_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "parcel_project_impact",
+    "name": "parcel_project_impact_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (parcel_id, project_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "parcel_zone",
+    "name": "parcel_zone_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "parcel_zone",
+    "name": "parcel_zone_zone_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (zone_id) REFERENCES plan_zone(zone_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "parcel_zone",
+    "name": "parcel_zone_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (parcel_id, zone_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "plan_zone",
+    "name": "plan_zone_plan_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (plan_id) REFERENCES master_plan(plan_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "plan_zone",
+    "name": "plan_zone_zone_code_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (zone_code) REFERENCES zone_type(zone_code)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "plan_zone",
+    "name": "plan_zone_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (zone_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "project_status_history",
+    "name": "project_status_history_project_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (project_id) REFERENCES dev_project(project_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "project_status_history",
+    "name": "project_status_history_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (project_id, effective_from)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "report_unlock",
+    "name": "report_unlock_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "report_unlock",
+    "name": "report_unlock_user_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "report_unlock",
+    "name": "report_unlock_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (user_id, parcel_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "sale_transaction",
+    "name": "sale_transaction_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "sale_transaction",
+    "name": "sale_transaction_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (txn_id, registered_on)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "schema_migrations",
+    "name": "schema_migrations_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (filename)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "soil_sample",
+    "name": "soil_sample_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (sample_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "spatial_ref_sys",
+    "name": "spatial_ref_sys_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (srid)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "village",
+    "name": "village_mandal_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (mandal_id) REFERENCES mandal(mandal_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "village",
+    "name": "village_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (village_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "village",
+    "name": "village_lgd_code_key",
+    "contype": "u",
+    "def": "UNIQUE (lgd_code)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "watchlist",
+    "name": "watchlist_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "watchlist",
+    "name": "watchlist_user_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "watchlist",
+    "name": "watchlist_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (user_id, parcel_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "zone_type",
+    "name": "zone_type_source_document_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (source_document_id) REFERENCES document(document_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "zone_type",
+    "name": "zone_type_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (zone_code)",
+    "ondelete": " "
+   }
+  ],
+  "generated": [
+   {
+    "tbl": "parcel",
+    "col": "area_sqm",
+    "expr": "st_area(geom)"
+   },
+   {
+    "tbl": "parcel",
+    "col": "centroid",
+    "expr": "st_pointonsurface(geom)"
+   },
+   {
+    "tbl": "document_chunk",
+    "col": "tsv",
+    "expr": "to_tsvector('english'::regconfig, content)"
+   },
+   {
+    "tbl": "gw_assessment",
+    "col": "category",
+    "expr": "\nCASE\n    WHEN (extraction_pct <= (70)::numeric) THEN 'safe'::gw_category\n    WHEN (extraction_pct <= (90)::numeric) THEN 'semi_critical'::gw_category\n    WHEN (extraction_pct <= (100)::numeric) THEN 'critical'::gw_category\n    ELSE 'over_exploited'::gw_category\nEND"
+   },
+   {
+    "tbl": "village",
+    "col": "centroid",
+    "expr": "st_pointonsurface(geom)"
+   }
+  ],
+  "mvs": [
+   {
+    "name": "mv_mandal_price_index",
+    "rows": 187,
+    "bytes": 40960
+   },
+   {
+    "name": "mv_parcel_metrics",
+    "rows": 99483,
+    "bytes": 25821184
+   },
+   {
+    "name": "mv_village_price_index",
+    "rows": 1012,
+    "bytes": 188416
+   }
+  ],
+  "docs": [
+   {
+    "id": 1,
+    "title": "Andhra Pradesh Agricultural Land (Conversion for Non-Agricultural Purposes) Act, 2006",
+    "pages": 12,
+    "chunks": 15,
+    "tokens_est": 4120
+   },
+   {
+    "id": 2,
+    "title": "Layout Regularization Scheme 2020: FAQs",
+    "pages": 3,
+    "chunks": 5,
+    "tokens_est": 1315
+   },
+   {
+    "id": 3,
+    "title": "Telangana Bhu Bharati (Record of Rights in Land) Act, 2025",
+    "pages": 24,
+    "chunks": 36,
+    "tokens_est": 10682
+   },
+   {
+    "id": 4,
+    "title": "Telangana Urban Areas (Development) Act, 1975",
+    "pages": 31,
+    "chunks": 93,
+    "tokens_est": 29532
+   }
+  ]
+ },
+ "SF5": {
+  "tables": [
+   "app_user",
+   "credit_ledger",
+   "dev_project",
+   "district",
+   "document",
+   "document_chunk",
+   "guideline_rate",
+   "gw_assessment",
+   "infra_feature",
+   "mandal",
+   "master_plan",
+   "parcel",
+   "parcel_coverage",
+   "parcel_project_impact",
+   "parcel_zone",
+   "plan_zone",
+   "project_status_history",
+   "report_unlock",
+   "sale_transaction",
+   "schema_migrations",
+   "soil_sample",
+   "spatial_ref_sys",
+   "village",
+   "watchlist",
+   "zone_type"
+  ],
+  "counts": {
+   "app_user": 1,
+   "credit_ledger": 2,
+   "dev_project": 5,
+   "district": 1,
+   "document": 4,
+   "document_chunk": 149,
+   "guideline_rate": 3330,
+   "gw_assessment": 136,
+   "infra_feature": 211,
+   "mandal": 8,
+   "master_plan": 1,
+   "parcel": 497222,
+   "parcel_coverage": 1,
+   "parcel_project_impact": 1885311,
+   "parcel_zone": 509454,
+   "plan_zone": 300,
+   "project_status_history": 14,
+   "report_unlock": 0,
+   "sale_transaction": 1759785,
+   "schema_migrations": 15,
+   "soil_sample": 2354,
+   "spatial_ref_sys": 8500,
+   "village": 185,
+   "watchlist": 0,
+   "zone_type": 8
+  },
+  "indexes": [
+   {
+    "name": "app_user_email_uq",
+    "tbl": "app_user",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX app_user_email_uq ON public.app_user USING btree (lower(email))",
+    "bytes": 16384
+   },
+   {
+    "name": "app_user_pkey",
+    "tbl": "app_user",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX app_user_pkey ON public.app_user USING btree (user_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "credit_ledger_idempotency_key_key",
+    "tbl": "credit_ledger",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX credit_ledger_idempotency_key_key ON public.credit_ledger USING btree (idempotency_key)",
+    "bytes": 16384
+   },
+   {
+    "name": "credit_ledger_pkey",
+    "tbl": "credit_ledger",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX credit_ledger_pkey ON public.credit_ledger USING btree (entry_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "ledger_user_ix",
+    "tbl": "credit_ledger",
+    "type": "btree",
+    "def": "CREATE INDEX ledger_user_ix ON public.credit_ledger USING btree (user_id, created_at DESC)",
+    "bytes": 16384
+   },
+   {
+    "name": "dev_project_name_key",
+    "tbl": "dev_project",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX dev_project_name_key ON public.dev_project USING btree (name)",
+    "bytes": 16384
+   },
+   {
+    "name": "dev_project_pkey",
+    "tbl": "dev_project",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX dev_project_pkey ON public.dev_project USING btree (project_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "project_geom_gix",
+    "tbl": "dev_project",
+    "type": "gist",
+    "def": "CREATE INDEX project_geom_gix ON public.dev_project USING gist (geom)",
+    "bytes": 8192
+   },
+   {
+    "name": "district_name_key",
+    "tbl": "district",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX district_name_key ON public.district USING btree (name)",
+    "bytes": 16384
+   },
+   {
+    "name": "district_pkey",
+    "tbl": "district",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX district_pkey ON public.district USING btree (district_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "document_pkey",
+    "tbl": "document",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX document_pkey ON public.document USING btree (document_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "document_sha256_key",
+    "tbl": "document",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX document_sha256_key ON public.document USING btree (sha256)",
+    "bytes": 16384
+   },
+   {
+    "name": "chunk_emb_hnsw",
+    "tbl": "document_chunk",
+    "type": "hnsw",
+    "def": "CREATE INDEX chunk_emb_hnsw ON public.document_chunk USING hnsw (embedding vector_cosine_ops)",
+    "bytes": 1228800
+   },
+   {
+    "name": "chunk_tsv_gin",
+    "tbl": "document_chunk",
+    "type": "gin",
+    "def": "CREATE INDEX chunk_tsv_gin ON public.document_chunk USING gin (tsv)",
+    "bytes": 417792
+   },
+   {
+    "name": "document_chunk_pkey",
+    "tbl": "document_chunk",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX document_chunk_pkey ON public.document_chunk USING btree (document_id, chunk_no)",
+    "bytes": 16384
+   },
+   {
+    "name": "guideline_rate_pkey",
+    "tbl": "guideline_rate",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX guideline_rate_pkey ON public.guideline_rate USING btree (village_id, land_class, effective_from)",
+    "bytes": 131072
+   },
+   {
+    "name": "gw_assessment_pkey",
+    "tbl": "gw_assessment",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX gw_assessment_pkey ON public.gw_assessment USING btree (mandal_id, assessment_year)",
+    "bytes": 16384
+   },
+   {
+    "name": "infra_feature_osm_id_key",
+    "tbl": "infra_feature",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX infra_feature_osm_id_key ON public.infra_feature USING btree (osm_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "infra_feature_pkey",
+    "tbl": "infra_feature",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX infra_feature_pkey ON public.infra_feature USING btree (feature_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "infra_geom_gix",
+    "tbl": "infra_feature",
+    "type": "gist",
+    "def": "CREATE INDEX infra_geom_gix ON public.infra_feature USING gist (geom)",
+    "bytes": 8192
+   },
+   {
+    "name": "mandal_district_id_name_key",
+    "tbl": "mandal",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX mandal_district_id_name_key ON public.mandal USING btree (district_id, name)",
+    "bytes": 16384
+   },
+   {
+    "name": "mandal_pkey",
+    "tbl": "mandal",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX mandal_pkey ON public.mandal USING btree (mandal_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "master_plan_pkey",
+    "tbl": "master_plan",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX master_plan_pkey ON public.master_plan USING btree (plan_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "mv_mandal_price_index_mandal_id_land_type_yr_idx",
+    "tbl": "mv_mandal_price_index",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX mv_mandal_price_index_mandal_id_land_type_yr_idx ON public.mv_mandal_price_index USING btree (mandal_id, land_type, yr)",
+    "bytes": 16384
+   },
+   {
+    "name": "pm_parcel_uq",
+    "tbl": "mv_parcel_metrics",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX pm_parcel_uq ON public.mv_parcel_metrics USING btree (parcel_id)",
+    "bytes": 11190272
+   },
+   {
+    "name": "pm_screener_ix",
+    "tbl": "mv_parcel_metrics",
+    "type": "btree",
+    "def": "CREATE INDEX pm_screener_ix ON public.mv_parcel_metrics USING btree (land_type, zone_code, cagr_5y DESC, parcel_id DESC) INCLUDE (price_sqm, nearest_active_project_m, area_sqm)",
+    "bytes": 33636352
+   },
+   {
+    "name": "mv_village_price_index_village_id_land_type_yr_idx",
+    "tbl": "mv_village_price_index",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX mv_village_price_index_village_id_land_type_yr_idx ON public.mv_village_price_index USING btree (village_id, land_type, yr)",
+    "bytes": 73728
+   },
+   {
+    "name": "parcel_centroid_gix",
+    "tbl": "parcel",
+    "type": "gist",
+    "def": "CREATE INDEX parcel_centroid_gix ON public.parcel USING gist (centroid)",
+    "bytes": 27066368
+   },
+   {
+    "name": "parcel_geom_gix",
+    "tbl": "parcel",
+    "type": "gist",
+    "def": "CREATE INDEX parcel_geom_gix ON public.parcel USING gist (geom)",
+    "bytes": 27238400
+   },
+   {
+    "name": "parcel_pkey",
+    "tbl": "parcel",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX parcel_pkey ON public.parcel USING btree (parcel_id)",
+    "bytes": 11190272
+   },
+   {
+    "name": "parcel_village_id_survey_no_sub_div_key",
+    "tbl": "parcel",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX parcel_village_id_survey_no_sub_div_key ON public.parcel USING btree (village_id, survey_no, sub_div)",
+    "bytes": 25739264
+   },
+   {
+    "name": "parcel_coverage_pkey",
+    "tbl": "parcel_coverage",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX parcel_coverage_pkey ON public.parcel_coverage USING btree (scale_factor)",
+    "bytes": 16384
+   },
+   {
+    "name": "impact_project_ix",
+    "tbl": "parcel_project_impact",
+    "type": "btree",
+    "def": "CREATE INDEX impact_project_ix ON public.parcel_project_impact USING btree (project_id, distance_m)",
+    "bytes": 76488704
+   },
+   {
+    "name": "parcel_project_impact_pkey",
+    "tbl": "parcel_project_impact",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX parcel_project_impact_pkey ON public.parcel_project_impact USING btree (parcel_id, project_id)",
+    "bytes": 78282752
+   },
+   {
+    "name": "parcel_zone_pkey",
+    "tbl": "parcel_zone",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX parcel_zone_pkey ON public.parcel_zone USING btree (parcel_id, zone_id)",
+    "bytes": 20815872
+   },
+   {
+    "name": "plan_zone_geom_gix",
+    "tbl": "plan_zone",
+    "type": "gist",
+    "def": "CREATE INDEX plan_zone_geom_gix ON public.plan_zone USING gist (geom)",
+    "bytes": 24576
+   },
+   {
+    "name": "plan_zone_pkey",
+    "tbl": "plan_zone",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX plan_zone_pkey ON public.plan_zone USING btree (zone_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "project_status_active_ix",
+    "tbl": "project_status_history",
+    "type": "btree",
+    "def": "CREATE INDEX project_status_active_ix ON public.project_status_history USING btree (project_id, effective_from DESC) WHERE (status = ANY (ARRAY['sanctioned'::project_status, 'under_construction'::project_status]))",
+    "bytes": 16384
+   },
+   {
+    "name": "project_status_history_pkey",
+    "tbl": "project_status_history",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX project_status_history_pkey ON public.project_status_history USING btree (project_id, effective_from)",
+    "bytes": 16384
+   },
+   {
+    "name": "report_unlock_pkey",
+    "tbl": "report_unlock",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX report_unlock_pkey ON public.report_unlock USING btree (user_id, parcel_id)",
+    "bytes": 8192
+   },
+   {
+    "name": "sale_date_brin",
+    "tbl": "sale_transaction",
+    "type": "brin",
+    "def": "CREATE INDEX sale_date_brin ON ONLY public.sale_transaction USING brin (registered_on)",
+    "bytes": 466944
+   },
+   {
+    "name": "sale_parcel_date_ix",
+    "tbl": "sale_transaction",
+    "type": "btree",
+    "def": "CREATE INDEX sale_parcel_date_ix ON ONLY public.sale_transaction USING btree (parcel_id, registered_on DESC)",
+    "bytes": 72572928
+   },
+   {
+    "name": "sale_transaction_pkey",
+    "tbl": "sale_transaction",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX sale_transaction_pkey ON ONLY public.sale_transaction USING btree (txn_id, registered_on)",
+    "bytes": 55574528
+   },
+   {
+    "name": "schema_migrations_pkey",
+    "tbl": "schema_migrations",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX schema_migrations_pkey ON public.schema_migrations USING btree (filename)",
+    "bytes": 16384
+   },
+   {
+    "name": "soil_geom_gix",
+    "tbl": "soil_sample",
+    "type": "gist",
+    "def": "CREATE INDEX soil_geom_gix ON public.soil_sample USING gist (geom)",
+    "bytes": 122880
+   },
+   {
+    "name": "soil_sample_pkey",
+    "tbl": "soil_sample",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX soil_sample_pkey ON public.soil_sample USING btree (sample_id)",
+    "bytes": 73728
+   },
+   {
+    "name": "spatial_ref_sys_pkey",
+    "tbl": "spatial_ref_sys",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX spatial_ref_sys_pkey ON public.spatial_ref_sys USING btree (srid)",
+    "bytes": 212992
+   },
+   {
+    "name": "village_geom_gix",
+    "tbl": "village",
+    "type": "gist",
+    "def": "CREATE INDEX village_geom_gix ON public.village USING gist (geom)",
+    "bytes": 8192
+   },
+   {
+    "name": "village_lgd_code_key",
+    "tbl": "village",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX village_lgd_code_key ON public.village USING btree (lgd_code)",
+    "bytes": 16384
+   },
+   {
+    "name": "village_name_trgm",
+    "tbl": "village",
+    "type": "gin",
+    "def": "CREATE INDEX village_name_trgm ON public.village USING gin (name gin_trgm_ops)",
+    "bytes": 98304
+   },
+   {
+    "name": "village_pkey",
+    "tbl": "village",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX village_pkey ON public.village USING btree (village_id)",
+    "bytes": 16384
+   },
+   {
+    "name": "watchlist_pkey",
+    "tbl": "watchlist",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX watchlist_pkey ON public.watchlist USING btree (user_id, parcel_id)",
+    "bytes": 8192
+   },
+   {
+    "name": "zone_type_pkey",
+    "tbl": "zone_type",
+    "type": "btree",
+    "def": "CREATE UNIQUE INDEX zone_type_pkey ON public.zone_type USING btree (zone_code)",
+    "bytes": 16384
+   }
+  ],
+  "cons": [
+   {
+    "tbl": "app_user",
+    "name": "app_user_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (user_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "credit_ledger",
+    "name": "credit_ledger_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "credit_ledger",
+    "name": "credit_ledger_user_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (user_id) REFERENCES app_user(user_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "credit_ledger",
+    "name": "credit_ledger_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (entry_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "credit_ledger",
+    "name": "credit_ledger_idempotency_key_key",
+    "contype": "u",
+    "def": "UNIQUE (idempotency_key)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "dev_project",
+    "name": "dev_project_document_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (document_id) REFERENCES document(document_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "dev_project",
+    "name": "dev_project_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (project_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "dev_project",
+    "name": "dev_project_name_key",
+    "contype": "u",
+    "def": "UNIQUE (name)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "district",
+    "name": "district_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (district_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "district",
+    "name": "district_name_key",
+    "contype": "u",
+    "def": "UNIQUE (name)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "document",
+    "name": "document_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (document_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "document",
+    "name": "document_sha256_key",
+    "contype": "u",
+    "def": "UNIQUE (sha256)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "document_chunk",
+    "name": "document_chunk_document_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (document_id) REFERENCES document(document_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "document_chunk",
+    "name": "document_chunk_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (document_id, chunk_no)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "guideline_rate",
+    "name": "guideline_rate_village_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (village_id) REFERENCES village(village_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "guideline_rate",
+    "name": "guideline_rate_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (village_id, land_class, effective_from)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "gw_assessment",
+    "name": "gw_assessment_mandal_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (mandal_id) REFERENCES mandal(mandal_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "gw_assessment",
+    "name": "gw_assessment_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (mandal_id, assessment_year)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "infra_feature",
+    "name": "infra_feature_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (feature_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "infra_feature",
+    "name": "infra_feature_osm_id_key",
+    "contype": "u",
+    "def": "UNIQUE (osm_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "mandal",
+    "name": "mandal_district_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (district_id) REFERENCES district(district_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "mandal",
+    "name": "mandal_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (mandal_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "mandal",
+    "name": "mandal_district_id_name_key",
+    "contype": "u",
+    "def": "UNIQUE (district_id, name)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "master_plan",
+    "name": "master_plan_document_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (document_id) REFERENCES document(document_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "master_plan",
+    "name": "master_plan_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (plan_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "parcel",
+    "name": "parcel_village_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (village_id) REFERENCES village(village_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "parcel",
+    "name": "parcel_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (parcel_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "parcel",
+    "name": "parcel_village_id_survey_no_sub_div_key",
+    "contype": "u",
+    "def": "UNIQUE (village_id, survey_no, sub_div)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "parcel_coverage",
+    "name": "parcel_coverage_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (scale_factor)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "parcel_project_impact",
+    "name": "parcel_project_impact_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "parcel_project_impact",
+    "name": "parcel_project_impact_project_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (project_id) REFERENCES dev_project(project_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "parcel_project_impact",
+    "name": "parcel_project_impact_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (parcel_id, project_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "parcel_zone",
+    "name": "parcel_zone_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "parcel_zone",
+    "name": "parcel_zone_zone_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (zone_id) REFERENCES plan_zone(zone_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "parcel_zone",
+    "name": "parcel_zone_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (parcel_id, zone_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "plan_zone",
+    "name": "plan_zone_plan_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (plan_id) REFERENCES master_plan(plan_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "plan_zone",
+    "name": "plan_zone_zone_code_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (zone_code) REFERENCES zone_type(zone_code)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "plan_zone",
+    "name": "plan_zone_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (zone_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "project_status_history",
+    "name": "project_status_history_project_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (project_id) REFERENCES dev_project(project_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "project_status_history",
+    "name": "project_status_history_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (project_id, effective_from)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "report_unlock",
+    "name": "report_unlock_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "report_unlock",
+    "name": "report_unlock_user_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "report_unlock",
+    "name": "report_unlock_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (user_id, parcel_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "sale_transaction",
+    "name": "sale_transaction_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "sale_transaction",
+    "name": "sale_transaction_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (txn_id, registered_on)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "schema_migrations",
+    "name": "schema_migrations_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (filename)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "soil_sample",
+    "name": "soil_sample_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (sample_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "spatial_ref_sys",
+    "name": "spatial_ref_sys_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (srid)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "village",
+    "name": "village_mandal_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (mandal_id) REFERENCES mandal(mandal_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "village",
+    "name": "village_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (village_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "village",
+    "name": "village_lgd_code_key",
+    "contype": "u",
+    "def": "UNIQUE (lgd_code)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "watchlist",
+    "name": "watchlist_parcel_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (parcel_id) REFERENCES parcel(parcel_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "watchlist",
+    "name": "watchlist_user_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE",
+    "ondelete": "c"
+   },
+   {
+    "tbl": "watchlist",
+    "name": "watchlist_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (user_id, parcel_id)",
+    "ondelete": " "
+   },
+   {
+    "tbl": "zone_type",
+    "name": "zone_type_source_document_id_fkey",
+    "contype": "f",
+    "def": "FOREIGN KEY (source_document_id) REFERENCES document(document_id)",
+    "ondelete": "a"
+   },
+   {
+    "tbl": "zone_type",
+    "name": "zone_type_pkey",
+    "contype": "p",
+    "def": "PRIMARY KEY (zone_code)",
+    "ondelete": " "
+   }
+  ],
+  "generated": [
+   {
+    "tbl": "village",
+    "col": "centroid",
+    "expr": "st_pointonsurface(geom)"
+   },
+   {
+    "tbl": "parcel",
+    "col": "area_sqm",
+    "expr": "st_area(geom)"
+   },
+   {
+    "tbl": "parcel",
+    "col": "centroid",
+    "expr": "st_pointonsurface(geom)"
+   },
+   {
+    "tbl": "document_chunk",
+    "col": "tsv",
+    "expr": "to_tsvector('english'::regconfig, content)"
+   },
+   {
+    "tbl": "gw_assessment",
+    "col": "category",
+    "expr": "\nCASE\n    WHEN (extraction_pct <= (70)::numeric) THEN 'safe'::gw_category\n    WHEN (extraction_pct <= (90)::numeric) THEN 'semi_critical'::gw_category\n    WHEN (extraction_pct <= (100)::numeric) THEN 'critical'::gw_category\n    ELSE 'over_exploited'::gw_category\nEND"
+   }
+  ],
+  "mvs": [
+   {
+    "name": "mv_mandal_price_index",
+    "rows": 204,
+    "bytes": 57344
+   },
+   {
+    "name": "mv_parcel_metrics",
+    "rows": 497222,
+    "bytes": 127197184
+   },
+   {
+    "name": "mv_village_price_index",
+    "rows": 1595,
+    "bytes": 245760
+   }
+  ],
+  "docs": [
+   {
+    "id": 1,
+    "title": "Andhra Pradesh Agricultural Land (Conversion for Non-Agricultural Purposes) Act, 2006",
+    "pages": 12,
+    "chunks": 15,
+    "tokens_est": 4120
+   },
+   {
+    "id": 2,
+    "title": "Layout Regularization Scheme 2020: FAQs",
+    "pages": 3,
+    "chunks": 5,
+    "tokens_est": 1315
+   },
+   {
+    "id": 3,
+    "title": "Telangana Bhu Bharati (Record of Rights in Land) Act, 2025",
+    "pages": 24,
+    "chunks": 36,
+    "tokens_est": 10682
+   },
+   {
+    "id": 4,
+    "title": "Telangana Urban Areas (Development) Act, 1975",
+    "pages": 31,
+    "chunks": 93,
+    "tokens_est": 29532
+   }
+  ]
+ }
+}

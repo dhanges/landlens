@@ -1,0 +1,111 @@
+-- Q3 at SF1: EXPLAIN (ANALYZE, BUFFERS) per variant (setup applied, then rolled back)
+
+== Q3 order_by_st_distance
+Limit  (cost=204913.43..204913.44 rows=7 width=52) (actual time=465.421..465.943 rows=10 loops=1)
+  Buffers: shared hit=362899
+  ->  Sort  (cost=204913.43..204913.44 rows=7 width=52) (actual time=435.834..436.353 rows=10 loops=1)
+        Sort Key: (st_distance(p.centroid, '0101000020847F000034325CFB656E1541D97C3E4FEC523E41'::geometry))
+        Sort Method: top-N heapsort  Memory: 26kB
+        Buffers: shared hit=362899
+        ->  Nested Loop  (cost=1552.58..204913.33 rows=7 width=52) (actual time=7.998..430.331 rows=14187 loops=1)
+              Buffers: shared hit=362899
+              ->  Gather  (cost=1546.76..204769.17 rows=7 width=40) (actual time=7.829..21.750 rows=28637 loops=1)
+                    Workers Planned: 2
+                    Workers Launched: 2
+                    Buffers: shared hit=1599
+                    ->  Parallel Bitmap Heap Scan on parcel p  (cost=546.76..203768.47 rows=3 width=40) (actual time=10.914..21.308 rows=9546 loops=3)
+                          Filter: ((parcel_id <> '59154'::bigint) AND (land_type = 'urban_plot'::land_type) AND st_dwithin(centroid, '0101000020847F000034325CFB656E1541D97C3E4FEC523E41'::geometry, '5000'::double precision))
+                          Rows Removed by Filter: 3360
+                          Heap Blocks: exact=505
+                          Buffers: shared hit=1599
+                          ->  Bitmap Index Scan on parcel_centroid_gix  (cost=0.00..546.75 rows=38380 width=0) (actual time=4.066..4.067 rows=38717 loops=1)
+                                Index Cond: (centroid && st_expand('0101000020847F000034325CFB656E1541D97C3E4FEC523E41'::geometry, '5000'::double precision))
+                                Buffers: shared hit=257
+              ->  Limit  (cost=5.83..8.07 rows=1 width=72) (actual time=0.013..0.013 rows=0 loops=28637)
+                    Buffers: shared hit=361300
+                    ->  Merge Append  (cost=5.83..48.50 rows=19 width=72) (actual time=0.013..0.013 rows=0 loops=28637)
+                          Sort Key: t.registered_on DESC
+                          Buffers: shared hit=361300
+                          Subplans Removed: 13
+                          ->  Index Scan using sale_transaction_2023_parcel_id_registered_on_idx on sale_transaction_2023 t_1  (cost=0.30..2.52 rows=1 width=72) (actual time=0.002..0.002 rows=0 loops=28637)
+                                Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                                Buffers: shared hit=57919
+                          ->  Index Scan using sale_transaction_2024_parcel_id_registered_on_idx on sale_transaction_2024 t_2  (cost=0.30..2.52 rows=1 width=72) (actual time=0.002..0.002 rows=0 loops=28637)
+                                Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                                Buffers: shared hit=62861
+                          ->  Index Scan using sale_transaction_2025_parcel_id_registered_on_idx on sale_transaction_2025 t_3  (cost=0.30..2.52 rows=1 width=72) (actual time=0.002..0.002 rows=0 loops=28637)
+                                Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                                Buffers: shared hit=63022
+                          ->  Index Scan using sale_transaction_2026_parcel_id_registered_on_idx on sale_transaction_2026 t_4  (cost=0.30..2.52 rows=1 width=72) (actual time=0.002..0.002 rows=0 loops=28637)
+                                Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                                Buffers: shared hit=62950
+                          ->  Index Scan using sale_transaction_2027_parcel_id_registered_on_idx on sale_transaction_2027 t_5  (cost=0.14..2.36 rows=1 width=72) (actual time=0.001..0.001 rows=0 loops=28637)
+                                Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                                Buffers: shared hit=57274
+                          ->  Index Scan using sale_transaction_default_parcel_id_registered_on_idx on sale_transaction_default t_6  (cost=0.14..2.36 rows=1 width=72) (actual time=0.001..0.001 rows=0 loops=28637)
+                                Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                                Buffers: shared hit=57274
+Planning:
+  Buffers: shared hit=338
+Planning Time: 3.261 ms
+JIT:
+  Functions: 55
+  Options: Inlining false, Optimization false, Expressions true, Deforming true
+  Timing: Generation 4.388 ms (Deform 1.466 ms), Inlining 0.000 ms, Optimization 3.134 ms, Emission 58.693 ms, Total 66.215 ms
+Execution Time: 509.515 ms
+
+== Q3 knn
+Limit  (cost=204870.29..205013.82 rows=7 width=60) (actual time=184.978..198.857 rows=10 loops=1)
+  Buffers: shared hit=1976
+  ->  Nested Loop  (cost=204870.29..205013.82 rows=7 width=60) (actual time=125.582..139.440 rows=10 loops=1)
+        Buffers: shared hit=1976
+        ->  Gather Merge  (cost=204864.46..204865.28 rows=7 width=40) (actual time=125.105..138.172 rows=29 loops=1)
+              Workers Planned: 2
+              Workers Launched: 2
+              Buffers: shared hit=1615
+              ->  Sort  (cost=203864.44..203864.45 rows=3 width=40) (actual time=33.789..33.798 rows=10 loops=3)
+                    Sort Key: ((p.centroid <-> '0101000020847F000034325CFB656E1541D97C3E4FEC523E41'::geometry))
+                    Sort Method: quicksort  Memory: 2558kB
+                    Buffers: shared hit=1615
+                    Worker 0:  Sort Method: quicksort  Memory: 25kB
+                    Worker 1:  Sort Method: quicksort  Memory: 25kB
+                    ->  Parallel Bitmap Heap Scan on parcel p  (cost=642.71..203864.42 rows=3 width=40) (actual time=5.170..25.093 rows=9546 loops=3)
+                          Filter: ((parcel_id <> '59154'::bigint) AND (land_type = 'urban_plot'::land_type) AND st_dwithin(centroid, '0101000020847F000034325CFB656E1541D97C3E4FEC523E41'::geometry, '5000'::double precision))
+                          Rows Removed by Filter: 3360
+                          Heap Blocks: exact=1342
+                          Buffers: shared hit=1599
+                          ->  Bitmap Index Scan on parcel_centroid_gix  (cost=0.00..642.70 rows=38380 width=0) (actual time=9.075..9.076 rows=38717 loops=1)
+                                Index Cond: (centroid && st_expand('0101000020847F000034325CFB656E1541D97C3E4FEC523E41'::geometry, '5000'::double precision))
+                                Buffers: shared hit=257
+        ->  Limit  (cost=5.83..8.07 rows=1 width=72) (actual time=0.039..0.040 rows=0 loops=29)
+              Buffers: shared hit=361
+              ->  Merge Append  (cost=5.83..48.50 rows=19 width=72) (actual time=0.038..0.038 rows=0 loops=29)
+                    Sort Key: t.registered_on DESC
+                    Buffers: shared hit=361
+                    Subplans Removed: 13
+                    ->  Index Scan using sale_transaction_2023_parcel_id_registered_on_idx on sale_transaction_2023 t_1  (cost=0.30..2.52 rows=1 width=72) (actual time=0.007..0.007 rows=0 loops=29)
+                          Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                          Buffers: shared hit=60
+                    ->  Index Scan using sale_transaction_2024_parcel_id_registered_on_idx on sale_transaction_2024 t_2  (cost=0.30..2.52 rows=1 width=72) (actual time=0.005..0.005 rows=0 loops=29)
+                          Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                          Buffers: shared hit=61
+                    ->  Index Scan using sale_transaction_2025_parcel_id_registered_on_idx on sale_transaction_2025 t_3  (cost=0.30..2.52 rows=1 width=72) (actual time=0.005..0.005 rows=0 loops=29)
+                          Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                          Buffers: shared hit=61
+                    ->  Index Scan using sale_transaction_2026_parcel_id_registered_on_idx on sale_transaction_2026 t_4  (cost=0.30..2.52 rows=1 width=72) (actual time=0.004..0.004 rows=0 loops=29)
+                          Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                          Buffers: shared hit=63
+                    ->  Index Scan using sale_transaction_2027_parcel_id_registered_on_idx on sale_transaction_2027 t_5  (cost=0.14..2.36 rows=1 width=72) (actual time=0.002..0.002 rows=0 loops=29)
+                          Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                          Buffers: shared hit=58
+                    ->  Index Scan using sale_transaction_default_parcel_id_registered_on_idx on sale_transaction_default t_6  (cost=0.14..2.36 rows=1 width=72) (actual time=0.002..0.002 rows=0 loops=29)
+                          Index Cond: ((parcel_id = p.parcel_id) AND (registered_on >= (COALESCE((NULLIF(current_setting('landlens.as_of_date'::text, true), ''::text))::date, CURRENT_DATE) - '3 years'::interval)))
+                          Buffers: shared hit=58
+Planning:
+  Buffers: shared hit=26
+Planning Time: 3.301 ms
+JIT:
+  Functions: 56
+  Options: Inlining false, Optimization false, Expressions true, Deforming true
+  Timing: Generation 8.363 ms (Deform 2.715 ms), Inlining 0.000 ms, Optimization 2.533 ms, Emission 70.134 ms, Total 81.030 ms
+Execution Time: 218.102 ms

@@ -1,6 +1,6 @@
 """ER diagram (Mermaid erDiagram) of the schema built by db/migrations, read from the live catalog.
 
-Base tables only (partitions, staging tables and schema_migrations left out; materialized views listed in a
+Base tables only (partitions, staging tables, schema_migrations and PostGIS's spatial_ref_sys left out; materialized views listed in a
 comment). Columns with simplified types, PK / FK / UK markers; one relationship per foreign key, with
 cardinality from the FK columns: NOT NULL -> exactly one parent (||), nullable -> zero or one (|o); unique FK
 columns -> one child (o|), otherwise many (o{).
@@ -21,7 +21,7 @@ SQL = r"""
 WITH t AS (
   SELECT c.oid, c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
   WHERE n.nspname = 'public' AND c.relkind IN ('r', 'p') AND NOT c.relispartition
-    AND c.relname NOT LIKE 'stg\_%' AND c.relname <> 'schema_migrations'),
+    AND c.relname NOT LIKE 'stg\_%' AND c.relname NOT IN ('schema_migrations', 'spatial_ref_sys')),
 cols AS (
   SELECT t.relname, a.attnum, a.attname, format_type(a.atttypid, a.atttypmod) AS type, a.attnotnull
   FROM t JOIN pg_attribute a ON a.attrelid = t.oid WHERE a.attnum > 0 AND NOT a.attisdropped),

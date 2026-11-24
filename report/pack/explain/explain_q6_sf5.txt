@@ -1,0 +1,102 @@
+-- Q6 at SF5: EXPLAIN (ANALYZE, BUFFERS) per variant (setup applied, then rolled back)
+
+== Q6 mv_no_covering_page1   [setup: DROP INDEX pm_screener_ix]
+Limit  (cost=16597.19..16603.02 rows=50 width=55) (actual time=165.632..180.130 rows=50 loops=1)
+  Buffers: shared hit=10144
+  ->  Gather Merge  (cost=16597.19..21013.80 rows=37854 width=55) (actual time=165.628..180.114 rows=50 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=10144
+        ->  Sort  (cost=15597.17..15644.48 rows=18927 width=55) (actual time=90.938..90.944 rows=34 loops=3)
+              Sort Key: cagr_5y DESC, parcel_id DESC
+              Sort Method: top-N heapsort  Memory: 38kB
+              Buffers: shared hit=10144
+              Worker 0:  Sort Method: top-N heapsort  Memory: 38kB
+              Worker 1:  Sort Method: top-N heapsort  Memory: 38kB
+              ->  Parallel Seq Scan on mv_parcel_metrics  (cost=0.00..14968.43 rows=18927 width=55) (actual time=13.446..71.364 rows=19437 loops=3)
+                    Filter: ((nearest_active_project_m <= '3000'::numeric) AND (cagr_5y >= 0.1) AND (gw_category <> 'over_exploited'::gw_category) AND (land_type = 'urban_plot'::land_type) AND (zone_code = ANY ('{R,M,C}'::text[])))
+                    Rows Removed by Filter: 146303
+                    Buffers: shared hit=10048
+Planning:
+  Buffers: shared hit=35
+Planning Time: 0.369 ms
+Execution Time: 180.191 ms
+
+== Q6 mv_covering_page1
+Limit  (cost=14302.89..14308.72 rows=50 width=55) (actual time=117.368..127.565 rows=50 loops=1)
+  Buffers: shared hit=7389
+  ->  Gather Merge  (cost=14302.89..18797.90 rows=38526 width=55) (actual time=117.364..127.547 rows=50 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=7389
+        ->  Sort  (cost=13302.86..13351.02 rows=19263 width=55) (actual time=51.456..51.463 rows=43 loops=3)
+              Sort Key: cagr_5y DESC, parcel_id DESC
+              Sort Method: top-N heapsort  Memory: 31kB
+              Buffers: shared hit=7389
+              Worker 0:  Sort Method: top-N heapsort  Memory: 31kB
+              Worker 1:  Sort Method: top-N heapsort  Memory: 31kB
+              ->  Parallel Index Scan using pm_screener_ix on mv_parcel_metrics  (cost=0.42..12662.96 rows=19263 width=55) (actual time=5.376..40.350 rows=19437 loops=3)
+                    Index Cond: ((land_type = 'urban_plot'::land_type) AND (zone_code = ANY ('{R,M,C}'::text[])) AND (cagr_5y >= 0.1))
+                    Filter: ((nearest_active_project_m <= '3000'::numeric) AND (gw_category <> 'over_exploited'::gw_category))
+                    Rows Removed by Filter: 32646
+                    Buffers: shared hit=7361
+Planning:
+  Buffers: shared hit=78
+Planning Time: 0.721 ms
+Execution Time: 127.634 ms
+
+== Q6 mv_covering_page50_offset
+Limit  (cost=15132.33..15138.16 rows=50 width=55) (actual time=143.407..167.045 rows=50 loops=1)
+  Buffers: shared hit=7327
+  ->  Gather Merge  (cost=14846.48..19341.49 rows=38526 width=55) (actual time=141.629..166.816 rows=2500 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=7327
+        ->  Sort  (cost=13846.45..13894.61 rows=19263 width=55) (actual time=74.301..74.457 rows=1235 loops=3)
+              Sort Key: cagr_5y DESC, parcel_id DESC
+              Sort Method: top-N heapsort  Memory: 551kB
+              Buffers: shared hit=7327
+              Worker 0:  Sort Method: top-N heapsort  Memory: 735kB
+              Worker 1:  Sort Method: top-N heapsort  Memory: 525kB
+              ->  Parallel Index Scan using pm_screener_ix on mv_parcel_metrics  (cost=0.42..12662.96 rows=19263 width=55) (actual time=3.839..44.556 rows=19437 loops=3)
+                    Index Cond: ((land_type = 'urban_plot'::land_type) AND (zone_code = ANY ('{R,M,C}'::text[])) AND (cagr_5y >= 0.1))
+                    Filter: ((nearest_active_project_m <= '3000'::numeric) AND (gw_category <> 'over_exploited'::gw_category))
+                    Rows Removed by Filter: 32646
+                    Buffers: shared hit=7299
+Planning Time: 0.326 ms
+Execution Time: 167.133 ms
+
+== Q6 mv_covering_page50_keyset
+Limit  (cost=13645.92..13651.75 rows=50 width=55) (actual time=166.696..184.411 rows=50 loops=1)
+  Buffers: shared hit=4600
+  ->  Gather Merge  (cost=13645.92..17262.84 rows=31000 width=55) (actual time=166.691..184.387 rows=50 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=4600
+        ->  Sort  (cost=12645.90..12684.65 rows=15500 width=55) (actual time=72.427..72.439 rows=50 loops=3)
+              Sort Key: cagr_5y DESC, parcel_id DESC
+              Sort Method: top-N heapsort  Memory: 31kB
+              Buffers: shared hit=4600
+              Worker 0:  Sort Method: top-N heapsort  Memory: 31kB
+              Worker 1:  Sort Method: top-N heapsort  Memory: 31kB
+              ->  Parallel Index Scan using pm_screener_ix on mv_parcel_metrics  (cost=0.42..12131.00 rows=15500 width=55) (actual time=1.884..53.796 rows=18621 loops=3)
+                    Index Cond: ((land_type = 'urban_plot'::land_type) AND (zone_code = ANY ('{R,M,C}'::text[])) AND (cagr_5y >= 0.1) AND (ROW(cagr_5y, parcel_id) < ROW(0.1294, '216303'::bigint)))
+                    Filter: ((nearest_active_project_m <= '3000'::numeric) AND (gw_category <> 'over_exploited'::gw_category))
+                    Rows Removed by Filter: 16521
+                    Buffers: shared hit=4572
+Planning Time: 0.412 ms
+Execution Time: 184.571 ms
+
+== Q6 mv_covering_selective_page1
+Limit  (cost=6187.33..6187.45 rows=50 width=55) (actual time=5.514..5.530 rows=50 loops=1)
+  Buffers: shared hit=188
+  ->  Sort  (cost=6187.33..6196.06 rows=3494 width=55) (actual time=5.510..5.516 rows=50 loops=1)
+        Sort Key: cagr_5y DESC, parcel_id DESC
+        Sort Method: top-N heapsort  Memory: 31kB
+        Buffers: shared hit=188
+        ->  Index Scan using pm_screener_ix on mv_parcel_metrics  (cost=0.42..6071.26 rows=3494 width=55) (actual time=0.163..2.909 rows=1848 loops=1)
+              Index Cond: ((land_type = 'urban_plot'::land_type) AND (zone_code = ANY ('{R,M,C}'::text[])) AND (cagr_5y >= 0.1692))
+              Filter: ((nearest_active_project_m <= '3000'::numeric) AND (gw_category <> 'over_exploited'::gw_category))
+              Buffers: shared hit=188
+Planning Time: 0.406 ms
+Execution Time: 5.600 ms
