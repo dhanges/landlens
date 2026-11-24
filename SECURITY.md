@@ -26,10 +26,10 @@ Scope: the Docker Compose stack (Caddy, Next.js, FastAPI, Martin, PostgreSQL) as
 | Database privilege | API connects as `landlens_api` (no DDL); Martin as `landlens_tiles` (tile functions and their tables only, never users or the ledger) | `013_roles.sql` |
 | Container escape impact | api runs as uid 10001, web as `node` (uid 1000) | `Dockerfile`s, security-check |
 | Vulnerable dependencies | Exact pins; OSV audit of all Python pins and npm lockfile packages (0 known on 2026-11-24) | `make audit` |
-| Secrets | `.env` is git-ignored and excluded from the zip; `.env.example` ships | `.gitignore` |
+| Secrets | `.env` is git-ignored; `.env.example` ships | `.gitignore` |
 | Data minimisation | Only email + password hash per user; no owner names or personal data in land records | schema (`app_user`, land tables) |
 | Third-party requests | Browser talks to the app and OpenFreeMap (map tiles) only; fonts are self-hosted | page CSP `connect-src` |
-| Recovery | `make backup` (pg_dump -Fc) and `make restore` (drill into a fresh container, compared with live) | `scripts/restore_drill.sh` |
+| Recovery | `make backup` (pg_dump -Fc) and `make restore` (drill into a fresh container, compared with live) | `ops/restore_drill.sh` |
 
 ## Residual risks (accepted for the MVP, planned for V1)
 

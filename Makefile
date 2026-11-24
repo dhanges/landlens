@@ -7,12 +7,12 @@ SF5_DB := landlens_sf5
 # the bench service runs as the host user (results/*.csv not root-owned)
 BENCH := UID=$(shell id -u) GID=$(shell id -g) $(COMPOSE) run --rm
 
-.PHONY: up down seed verify migrate bench seed-sf5 bench-sf5 test concurrency ingest-dry ingest eval demo-concurrency backup restore security-check audit pgbench charts zip er test-zipcheck
+.PHONY: up down seed verify migrate bench seed-sf5 bench-sf5 test concurrency ingest-dry ingest eval demo-concurrency backup restore security-check audit pgbench charts
 
 # Build and start the stack; the one-shot `migrate` service applies the schema phase first (spec 2.17).
 # First run: creates .env from .env.example with random local secrets (an existing .env is never touched).
 up:
-	sh scripts/make_env.sh
+	sh ops/make_env.sh
 	$(COMPOSE) up -d --build --wait
 	$(COMPOSE) logs migrate | tail -3
 
@@ -59,46 +59,16 @@ ingest:
 eval:
 	$(BENCH) bench python /app/bench/rag_eval.py $(EVAL_ARGS)
 
-# Submission zip: dist/landlens-submission.zip with one top-level folder landlens-submission/.
-# Excludes .env, data volumes and backups, node_modules, build output and caches; seed_inputs/ is included so a
-# fresh machine seeds without downloads or an OpenAI key. Needs only make + zip; then runs the zip_contents
-# check (scripts/zipcheck.py) when python3 is available, and prints the size.
-ZIP := dist/landlens-submission.zip
-zip:
-	mkdir -p dist
-	rm -f $(ZIP) dist/landlens-submission
-	ln -s .. dist/landlens-submission
-	cd dist && zip -qr landlens-submission.zip landlens-submission \
-	  -x 'landlens-submission/dist/*' 'landlens-submission/backups/*' 'landlens-submission/data/*' \
-	     '*/.env' '*/.env.local' '*/.env.*.local' '*/pgdata/*' '*/wal_archive/*' \
-	     '*/node_modules/*' '*/.next/*' '*/out/*' '*/__pycache__/*' '*.pyc' '*/.pytest_cache/*' '*/.ruff_cache/*' \
-	     '*/.venv/*' '*/*.egg-info/*' '*.tsbuildinfo' 'landlens-submission/web/next-env.d.ts' \
-	     'landlens-submission/web/public/maplibre/*' '*/.DS_Store'
-	rm -f dist/landlens-submission
-	@if unzip -l $(ZIP) | awk '{print $$4}' | grep -E '(^|/)\.env$$' >/dev/null; then echo "FORBIDDEN: .env in zip"; exit 1; fi
-	@if command -v python3 >/dev/null 2>&1; then python3 scripts/zipcheck.py $(ZIP); \
-	  else echo "zip_contents: python3 not available; .env check above passed"; fi
-	@ls -lh $(ZIP) | awk '{print "size:", $$5, "  path:", $$9}'
-
-# Tests for the zip_contents check (scripts/zipcheck.py), in the test image
-test-zipcheck:
-	$(COMPOSE) --profile tools build test
-	$(BENCH) -v $(CURDIR)/scripts:/scripts test pytest -q -p no:cacheprovider /scripts/test_zipcheck.py
-
-# ER diagram (Mermaid) from the migrated schema: report/er-diagram.mmd
-er:
-	python3 scripts/er_diagram.py
-
 # Security (SECURITY.md): headers/limits/guards against the running stack; dependency audit against OSV
 security-check:
-	scripts/security_check.sh
+	ops/security_check.sh
 
 audit:
-	python3 scripts/audit.py
+	python3 ops/audit.py
 
 # pgbench on the screener at 8 and 32 clients (spec 2.19); DB=landlens_sf5 for SF5
 pgbench:
-	DB=$(or $(DB),landlens_owner) scripts/pgbench_screener.sh
+	DB=$(or $(DB),landlens_owner) ops/pgbench_screener.sh
 
 # Benchmark charts (SVG) from bench/results into bench/charts
 charts:
@@ -112,7 +82,7 @@ backup:
 
 # Restore drill: the newest backup (or DUMP=path) into a fresh throwaway container, compared with the live DB
 restore:
-	scripts/restore_drill.sh $(DUMP)
+	ops/restore_drill.sh $(DUMP)
 
 # Three-version concurrency demo (spec 2.11): broken / row lock / SERIALIZABLE, two real sessions, transcript in
 # bench/results/concurrency_demo.txt. Live two-terminal version: bench/concurrency_demo/README.md

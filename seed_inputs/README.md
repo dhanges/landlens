@@ -1,6 +1,6 @@
 # seed_inputs/
 
-Inputs for `make seed`, tracked in git so every checkout (and the submission zip) can seed without downloads
+Inputs for `make seed`, tracked in git so every checkout can seed without downloads
 or an OpenAI key. When a file is missing, the generator uses a clearly marked synthetic fallback: rows get
 `source = 'synthetic'` and names start with `[fallback]`, and `landlens verify` reports them. Origins and dates
 of every input: `sources.md`.

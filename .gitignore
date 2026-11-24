@@ -36,3 +36,7 @@ __pycache__/
 
 # local archives at the top level (make zip writes to dist/)
 /*.zip
+
+# submission material lives outside this repository
+/report/
+/scripts/

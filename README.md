@@ -14,16 +14,14 @@ credits; it is not a marketplace. **All land data in this build is synthetic** (
 
 ## Run it
 
-Unzip and enter the folder (from a git checkout, use the `landlens/` folder instead):
-
 ```
-unzip landlens-submission.zip
-cd landlens-submission
+git clone https://github.com/dhanges/landlens.git
+cd landlens
 make up          # builds and starts the stack; first run creates .env with random local secrets
 make seed SF=1   # generates the database: 100k parcels, ~343k sales, the documents
 ```
 
-Measured on the fresh-machine test (2026-11-24, 12-core laptop): `make up` 1.9 min and `make seed SF=1`
+Measured on a fresh checkout (2026-11-24, 12-core laptop): `make up` 1.9 min and `make seed SF=1`
 2.7 min, with Docker base images already downloaded. On a machine without them, the first `make up` also pulls
 about 2 GB of images and packages: allow 10-20 minutes depending on the connection. Then open
 **http://localhost** (use `localhost`, not `127.0.0.1`: the session cookie is `Secure`, and browsers only accept
@@ -85,7 +83,6 @@ best match the question, each with its document and page, and says so.
 | `make charts` | SVG charts from the results -> `bench/charts/` | seconds |
 | `make backup` / `make restore` | `pg_dump -Fc`, then a restore drill into a fresh container compared with live | ~4 min |
 | `make security-check` / `make audit` | hardening checks against the running stack / OSV dependency audit | ~10 s |
-| `make er` | regenerate the ER diagram from the schema | seconds |
 | `make ingest-dry` / `make ingest` / `make eval` | RAG: chunk the PDFs (free) / embed them (paid) / 25-question eval (paid) | - |
 
 `make down` stops the stack (data kept); `docker compose down -v` also deletes the database volume.
@@ -96,13 +93,12 @@ best match the question, each with its document and page, and says so.
 | --- | --- |
 | `bench/results/` | benchmark CSVs (SF1, SF5), pgbench, tile weights, concurrency and restore-drill records, RAG eval |
 | `bench/charts/` | benchmark charts (SVG) |
-| `report/er-diagram.mmd` | ER diagram (Mermaid) generated from the migrations |
-| `report/screenshots/` | screenshots of the main pages, light and dark |
 | `SECURITY.md` | threats, controls, evidence and residual risks |
 | `db/migrations/` | the schema: tables, indexes, materialized views, tile functions, roles |
 | `api/` | FastAPI app (raw SQL), the `landlens` CLI (generator, ingest, bench), tests |
 | `web/` | Next.js frontend; design brief in `web/DESIGN.md` |
 | `seed_inputs/` | every input `make seed` needs, with `sources.md` |
+| `ops/` | first-run `.env` helper, restore drill, security check, dependency audit, pgbench script |
 
 ## Troubleshooting
 

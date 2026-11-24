@@ -53,7 +53,7 @@ done
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   git ls-files | grep -qE '(^|/)\.env$' && fail ".env is not tracked by git" || pass ".env is not tracked by git"
 else
-  pass ".env tracking: not a git checkout (the zip excludes .env)"
+  pass ".env tracking: not a git checkout"
 fi
 
 [ "$FAIL" = 0 ] && echo "security check OK" || { echo "security check FAILED"; exit 1; }

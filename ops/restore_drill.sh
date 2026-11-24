@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Restore drill (spec 2.11 "Recovery"): restore a pg_dump -Fc file into a FRESH throwaway container built from the
-# same db image, then compare it with the live database. Usage: scripts/restore_drill.sh [backups/<file>.dump]
+# same db image, then compare it with the live database. Usage: ops/restore_drill.sh [backups/<file>.dump]
 # Writes bench/results/restore_drill.txt. Stops and deletes only its own container (landlens-restore-drill).
 set -euo pipefail
 cd "$(dirname "$0")/.."
