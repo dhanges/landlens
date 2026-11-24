@@ -8,6 +8,8 @@ For each question: one embedding (text-embedding-3-small), then the exact /chat 
 hybrid statement, the not-found rule, generation with LLM_MODEL, the citation check). Scoring:
 - answerable: correct if found and at least one citation's document and page range overlap the expected pages;
 - unanswerable: correct if found is false (no answer);
+- answer_correct: a correct citation AND the answer passes must_include / must_not_include / must_not_start_with
+  (catches a right page with a wrong reading, e.g. "Yes" where the FAQ says No);
 - retrieval recall@10 per method (keyword-only websearch, vector-only HNSW, hybrid RRF): an expected page is
   covered by one of the top 10 chunks (Q8 quality, spec 2.19).
 Answers are printed and saved so a human can check them against key_facts. Target: >= 80% correct citations
@@ -54,6 +56,15 @@ class Cached:
     async def chat(self, messages):
         self.prompt_tokens = sum(est_tokens(m["content"]) for m in messages)
         return await self.llm.chat(messages)
+
+
+def facts_ok(answer: str | None, q: dict) -> tuple[bool, list[str]]:
+    """Required phrases (every group, any alternative) present; forbidden phrases and openings absent."""
+    text = " ".join((answer or "").lower().split())
+    problems = [f"missing one of {g}" for g in q.get("must_include", []) if not any(a.lower() in text for a in g)]
+    problems += [f"contains {x!r}" for x in q.get("must_not_include", []) if x.lower() in text]
+    problems += [f"starts with {x!r}" for x in q.get("must_not_start_with", []) if text.startswith(x.lower())]
+    return not problems, problems
 
 
 def overlaps(doc_id: int, ps: int, pe: int, expected: list[dict], ids: dict[str, int]) -> bool:
@@ -130,21 +141,26 @@ async def main() -> int:
                  "seconds": round(secs, 2), "prompt_tokens_est": getattr(cached, "prompt_tokens", 0),
                  "best_distance": hy[0]["best_distance"] if hy else None, "keyword_hits": hy[0]["kw_hits"] if hy else 0,
                  "key_facts": q["key_facts"]}
+            r["retrieved"] = [(x["document_id"], x["chunk_no"], x["page_start"], x["page_end"]) for x in hy[:6]]
             if q["answerable"]:
                 hits = [overlaps(c["document_id"], c["page_start"], c["page_end"], q["expected"], ids) for c in res["citations"]]
                 r["correct"] = bool(res["found"] and any(hits))
                 r["all_citations_correct"] = bool(hits) and all(hits)
+                r["facts_ok"], r["fact_problems"] = facts_ok(res["answer"], q)
+                r["answer_correct"] = r["correct"] and r["facts_ok"]
                 for name, rows in (("keyword", kw), ("vector", vv), ("hybrid", hy)):
                     r[f"recall10_{name}"] = any(overlaps(x["document_id"], x["page_start"], x["page_end"], q["expected"], ids)
                                                 for x in rows)
             else:
                 r["correct"] = not res["found"]
             results.append(r)
-            mark = "OK " if r["correct"] else "MISS"
+            mark = "OK  " if r["correct"] and r.get("facts_ok", True) else "MISS"
             print(f"{mark} {q['id']} found={res['found']} cites={[(c['title'][:28], c['page_start']) for c in res['citations']]}"
                   f" d={r['best_distance'] if r['best_distance'] is None else round(r['best_distance'], 3)} kw={r['keyword_hits']}")
             print(f"     answer: {(res['answer'] or res.get('note') or '')[:300]}")
             print(f"     key facts: {q['key_facts']}")
+            if r.get("fact_problems"):
+                print(f"     fact check: {'; '.join(r['fact_problems'])}")
     finally:
         await llm.aclose()
         await pool.close()
@@ -155,6 +171,7 @@ async def main() -> int:
     summary = {
         "questions": len(results), "model": llm_model(), "max_distance": MAX_DISTANCE,
         "citation_correct_pct": pct(ans, "correct"), "all_citations_correct_pct": pct(ans, "all_citations_correct"),
+        "answer_correct_pct": pct(ans, "answer_correct"),
         "refusal_accuracy_pct": pct(una, "correct"),
         "recall_at_10_pct": {m: pct(ans, f"recall10_{m}") for m in ("keyword", "vector", "hybrid")},
         "target_met": (pct(ans, "correct") or 0) >= 80 and all(r["correct"] for r in una),
