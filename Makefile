@@ -7,7 +7,7 @@ SF5_DB := landlens_sf5
 # the bench service runs as the host user (results/*.csv not root-owned)
 BENCH := UID=$(shell id -u) GID=$(shell id -g) $(COMPOSE) run --rm
 
-.PHONY: up down seed verify migrate bench seed-sf5 bench-sf5 test concurrency ingest-dry ingest eval demo-concurrency
+.PHONY: up down seed verify migrate bench seed-sf5 bench-sf5 test concurrency ingest-dry ingest eval demo-concurrency backup restore security-check audit pgbench charts
 
 # Build and start the stack; the one-shot `migrate` service applies the schema phase first (spec 2.17).
 up:
@@ -56,6 +56,31 @@ ingest:
 # 25-question eval (spec 2.13): calls /chat's pipeline with your key (paid: ~25 embeddings + up to 25 LLM calls)
 eval:
 	$(BENCH) bench python /app/bench/rag_eval.py $(EVAL_ARGS)
+
+# Security (SECURITY.md): headers/limits/guards against the running stack; dependency audit against OSV
+security-check:
+	scripts/security_check.sh
+
+audit:
+	python3 scripts/audit.py
+
+# pgbench on the screener at 8 and 32 clients (spec 2.19); DB=landlens_sf5 for SF5
+pgbench:
+	DB=$(or $(DB),landlens_owner) scripts/pgbench_screener.sh
+
+# Benchmark charts (SVG) from bench/results into bench/charts
+charts:
+	python3 bench/charts.py
+
+# Backup (spec 2.11): pg_dump -Fc of the main database into backups/ (git-ignored)
+backup:
+	mkdir -p backups
+	$(COMPOSE) exec -T db pg_dump -U landlens_owner -Fc landlens_owner > backups/landlens_$$(date +%Y%m%d_%H%M%S).dump
+	@ls -lh backups | tail -1
+
+# Restore drill: the newest backup (or DUMP=path) into a fresh throwaway container, compared with the live DB
+restore:
+	scripts/restore_drill.sh $(DUMP)
 
 # Three-version concurrency demo (spec 2.11): broken / row lock / SERIALIZABLE, two real sessions, transcript in
 # bench/results/concurrency_demo.txt. Live two-terminal version: bench/concurrency_demo/README.md

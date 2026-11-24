@@ -12,3 +12,6 @@ __pycache__/
 *.pyc
 /api/dist/
 /api/build/
+
+# pg_dump backups (make backup); the restore drill writes bench/results/restore_drill.txt
+/backups/

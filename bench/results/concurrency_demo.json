@@ -12,7 +12,7 @@
     "final_balance": 3,
     "ledger_sum": 3,
     "expected": 3,
-    "b_waited_s": 1.52,
+    "b_waited_s": 1.51,
     "b_saw": 4,
     "correct": true
   },

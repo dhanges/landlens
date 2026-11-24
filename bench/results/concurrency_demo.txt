@@ -1,39 +1,39 @@
    time  session A                                            | session B
 ----------------------------------------------------------------------------------------------------
          -- VERSION 1 - broken: READ COMMITTED, read then write read_value - 1, no lock
-  0.08s  BEGIN                                                | 
-  0.08s  SELECT credit_balance -> 5                           | 
-  0.08s                                                       | BEGIN
-  0.09s                                                       | SELECT credit_balance -> 5
-  0.09s  UPDATE SET credit_balance = 4                        | 
-  0.09s  COMMIT                                               | 
-  0.09s                                                       | UPDATE SET credit_balance = 4  (no wait)
-  0.09s                                                       | COMMIT
+  0.07s  BEGIN                                                | 
+  0.07s  SELECT credit_balance -> 5                           | 
+  0.07s                                                       | BEGIN
+  0.07s                                                       | SELECT credit_balance -> 5
+  0.08s  UPDATE SET credit_balance = 4                        | 
+  0.08s  COMMIT                                               | 
+  0.08s                                                       | UPDATE SET credit_balance = 4  (no wait)
+  0.08s                                                       | COMMIT
          -- two purchases from 5 credits should leave 3; the balance is 4 -> LOST UPDATE
 
          -- VERSION 2 - row lock: the spec 2.11 purchase transaction (SELECT ... FOR UPDATE)
-  0.14s  BEGIN                                                | 
+  0.13s  BEGIN                                                | 
   0.14s  SELECT ... FOR UPDATE -> 5  (row locked)             | 
   0.14s                                                       | BEGIN
   0.14s                                                       | SELECT ... FOR UPDATE  (waits for A's lock)
   1.65s  INSERT unlock + ledger; UPDATE -> 4                  | 
-  1.66s  COMMIT  (releases the lock)                          | 
-  1.66s                                                       | ... got the lock after 1.52 s -> 4
-  1.67s                                                       | INSERT unlock + ledger; UPDATE -> 3
-  1.67s                                                       | COMMIT
-         -- B waited 1.52 s and saw 4 (A's committed value); balance 3, ledger sum 3 -> CORRECT
+  1.65s  COMMIT  (releases the lock)                          | 
+  1.65s                                                       | ... got the lock after 1.51 s -> 4
+  1.66s                                                       | INSERT unlock + ledger; UPDATE -> 3
+  1.66s                                                       | COMMIT
+         -- B waited 1.51 s and saw 4 (A's committed value); balance 3, ledger sum 3 -> CORRECT
 
          -- VERSION 3 - SERIALIZABLE, no explicit lock; 40001 is retried (up to 3 attempts, jitter), as the API does
-  1.73s  BEGIN ISOLATION LEVEL SERIALIZABLE                   | 
-  1.73s  SELECT credit_balance -> 5                           | 
-  1.73s                                                       | BEGIN ISOLATION LEVEL SERIALIZABLE
-  1.73s                                                       | SELECT credit_balance -> 5
-  1.74s  UPDATE SET credit_balance = credit_balance - 1       | 
-  1.74s  COMMIT                                               | 
-  1.74s                                                       | UPDATE -> ERROR 40001: could not serialize access due to concur
-  1.74s                                                       | ROLLBACK
-  1.89s                                                       | retry 2: BEGIN SERIALIZABLE
-  1.89s                                                       | SELECT credit_balance -> 4
-  1.90s                                                       | UPDATE SET credit_balance = credit_balance - 1
-  1.91s                                                       | COMMIT
+  1.71s  BEGIN ISOLATION LEVEL SERIALIZABLE                   | 
+  1.71s  SELECT credit_balance -> 5                           | 
+  1.71s                                                       | BEGIN ISOLATION LEVEL SERIALIZABLE
+  1.72s                                                       | SELECT credit_balance -> 5
+  1.72s  UPDATE SET credit_balance = credit_balance - 1       | 
+  1.72s  COMMIT                                               | 
+  1.72s                                                       | UPDATE -> ERROR 40001: could not serialize access due to concur
+  1.72s                                                       | ROLLBACK
+  1.91s                                                       | retry 2: BEGIN SERIALIZABLE
+  1.91s                                                       | SELECT credit_balance -> 4
+  1.92s                                                       | UPDATE SET credit_balance = credit_balance - 1
+  1.92s                                                       | COMMIT
          -- B failed with 40001, succeeded on attempt 2; balance 3 -> CORRECT

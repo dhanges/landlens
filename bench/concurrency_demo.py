@@ -65,21 +65,26 @@ def broken(admin) -> dict:
     note("VERSION 1 - broken: READ COMMITTED, read then write read_value - 1, no lock")
     uid = new_user(admin)
     a, b = connect(), connect()
-    a.execute("BEGIN"); log("A", "BEGIN")
+    a.execute("BEGIN")
+    log("A", "BEGIN")
     va = a.execute("SELECT credit_balance FROM app_user WHERE user_id = %s", (uid,)).fetchone()[0]
     log("A", f"SELECT credit_balance -> {va}")
-    b.execute("BEGIN"); log("B", "BEGIN")
+    b.execute("BEGIN")
+    log("B", "BEGIN")
     vb = b.execute("SELECT credit_balance FROM app_user WHERE user_id = %s", (uid,)).fetchone()[0]
     log("B", f"SELECT credit_balance -> {vb}")
     a.execute("UPDATE app_user SET credit_balance = %s WHERE user_id = %s", (va - 1, uid))
     log("A", f"UPDATE SET credit_balance = {va - 1}")
-    a.execute("COMMIT"); log("A", "COMMIT")
+    a.execute("COMMIT")
+    log("A", "COMMIT")
     b.execute("UPDATE app_user SET credit_balance = %s WHERE user_id = %s", (vb - 1, uid))
     log("B", f"UPDATE SET credit_balance = {vb - 1}  (no wait)")
-    b.execute("COMMIT"); log("B", "COMMIT")
+    b.execute("COMMIT")
+    log("B", "COMMIT")
     final = balance(admin, uid)[0]
     note(f"two purchases from 5 credits should leave 3; the balance is {final} -> LOST UPDATE")
-    a.close(); b.close()
+    a.close()
+    b.close()
     return {"start": 5, "purchases": 2, "final_balance": final, "expected": 3, "lost_update": final != 3}
 
 
@@ -99,13 +104,15 @@ def row_lock(admin) -> dict:
     uid = new_user(admin)
     p1, p2 = [r[0] for r in admin.execute("SELECT parcel_id FROM parcel ORDER BY parcel_id LIMIT 2")]
     a, b = connect(), connect()
-    a.execute("BEGIN"); log("A", "BEGIN")
+    a.execute("BEGIN")
+    log("A", "BEGIN")
     va = a.execute(PURCHASE_LOCK, (uid,)).fetchone()[0]
     log("A", f"SELECT ... FOR UPDATE -> {va}  (row locked)")
     res = {}
 
     def session_b():
-        b.execute("BEGIN"); log("B", "BEGIN")
+        b.execute("BEGIN")
+        log("B", "BEGIN")
         log("B", "SELECT ... FOR UPDATE  (waits for A's lock)")
         t = time.perf_counter()
         vb = b.execute(PURCHASE_LOCK, (uid,)).fetchone()[0]
@@ -114,19 +121,22 @@ def row_lock(admin) -> dict:
         log("B", f"... got the lock after {res['waited_s']} s -> {vb}")
         nb = purchase_rest(b, uid, p2)
         log("B", f"INSERT unlock + ledger; UPDATE -> {nb}")
-        b.execute("COMMIT"); log("B", "COMMIT")
+        b.execute("COMMIT")
+        log("B", "COMMIT")
 
     tb = threading.Thread(target=session_b)
     tb.start()
     time.sleep(1.5)                                 # B is now blocked on the row lock
     na = purchase_rest(a, uid, p1)
     log("A", f"INSERT unlock + ledger; UPDATE -> {na}")
-    a.execute("COMMIT"); log("A", "COMMIT  (releases the lock)")
+    a.execute("COMMIT")
+    log("A", "COMMIT  (releases the lock)")
     tb.join()
     final, ledger = balance(admin, uid)
     note(f"B waited {res['waited_s']} s and saw {res['b_saw']} (A's committed value); balance {final}, "
          f"ledger sum {ledger} -> CORRECT")
-    a.close(); b.close()
+    a.close()
+    b.close()
     return {"start": 5, "purchases": 2, "final_balance": final, "ledger_sum": ledger, "expected": 3,
             "b_waited_s": res["waited_s"], "b_saw": res["b_saw"], "correct": final == 3 == ledger}
 
@@ -135,15 +145,18 @@ def serializable(admin) -> dict:
     note("VERSION 3 - SERIALIZABLE, no explicit lock; 40001 is retried (up to 3 attempts, jitter), as the API does")
     uid = new_user(admin)
     a, b = connect(), connect()
-    a.execute("BEGIN ISOLATION LEVEL SERIALIZABLE"); log("A", "BEGIN ISOLATION LEVEL SERIALIZABLE")
+    a.execute("BEGIN ISOLATION LEVEL SERIALIZABLE")
+    log("A", "BEGIN ISOLATION LEVEL SERIALIZABLE")
     va = a.execute("SELECT credit_balance FROM app_user WHERE user_id = %s", (uid,)).fetchone()[0]
     log("A", f"SELECT credit_balance -> {va}")
-    b.execute("BEGIN ISOLATION LEVEL SERIALIZABLE"); log("B", "BEGIN ISOLATION LEVEL SERIALIZABLE")
+    b.execute("BEGIN ISOLATION LEVEL SERIALIZABLE")
+    log("B", "BEGIN ISOLATION LEVEL SERIALIZABLE")
     vb = b.execute("SELECT credit_balance FROM app_user WHERE user_id = %s", (uid,)).fetchone()[0]
     log("B", f"SELECT credit_balance -> {vb}")
     a.execute("UPDATE app_user SET credit_balance = credit_balance - 1 WHERE user_id = %s", (uid,))
     log("A", "UPDATE SET credit_balance = credit_balance - 1")
-    a.execute("COMMIT"); log("A", "COMMIT")
+    a.execute("COMMIT")
+    log("A", "COMMIT")
     attempts, sqlstate = 1, None
     try:
         b.execute("UPDATE app_user SET credit_balance = credit_balance - 1 WHERE user_id = %s", (uid,))
@@ -151,7 +164,8 @@ def serializable(admin) -> dict:
     except pgerr.SerializationFailure as e:
         sqlstate = e.sqlstate
         log("B", f"UPDATE -> ERROR {e.sqlstate}: {str(e).splitlines()[0][:40]}")
-        b.execute("ROLLBACK"); log("B", "ROLLBACK")
+        b.execute("ROLLBACK")
+        log("B", "ROLLBACK")
         while attempts < 3:
             attempts += 1
             time.sleep(random.uniform(0.05, 0.2))   # jitter
@@ -162,13 +176,15 @@ def serializable(admin) -> dict:
                 log("B", f"SELECT credit_balance -> {vb}")
                 b.execute("UPDATE app_user SET credit_balance = credit_balance - 1 WHERE user_id = %s", (uid,))
                 log("B", "UPDATE SET credit_balance = credit_balance - 1")
-                b.execute("COMMIT"); log("B", "COMMIT")
+                b.execute("COMMIT")
+                log("B", "COMMIT")
                 break
             except pgerr.SerializationFailure:
                 b.execute("ROLLBACK")
     final = balance(admin, uid)[0]
     note(f"B failed with {sqlstate}, succeeded on attempt {attempts}; balance {final} -> CORRECT")
-    a.close(); b.close()
+    a.close()
+    b.close()
     return {"start": 5, "purchases": 2, "final_balance": final, "expected": 3, "sqlstate": sqlstate,
             "attempts": attempts, "correct": final == 3 and sqlstate == "40001"}
 
